@@ -1095,28 +1095,21 @@
                     if (hasClassInAncestry(img, 'ignore_js_op', div)) continue;
  
                     var src = img.getAttribute('zoomfile') || img.getAttribute('file') || img.src;
-                    if (!src) return;
+                    if (!src) continue;
                     if (src.indexOf('mod=attachment') !== -1) {
                          src = src.replace('&noupdate=yes', '').replace(REGEX_AMP, '&');
                     }
                     
-                    if (inContainer) {
-                         var src = img.getAttribute('zoomfile') || img.getAttribute('file') || img.src;
-                         if (!src) continue;
-                         if (src.indexOf('mod=attachment') !== -1) {
-                              src = src.replace('&noupdate=yes', '').replace(regexAmp, '&');
-                         }
-                         if (src.indexOf('http') !== 0) { try { src = new URL(src, window.location.href).href; } catch(e) { src = window.location.origin + '/' + src; } }
+                    if (src.indexOf('http') !== 0) { try { src = new URL(src, window.location.href).href; } catch(e) { src = window.location.origin + '/' + src; } }
 
-                         var lowSrc = src.toLowerCase();
-                         if (Scraper.isGarbageImage(lowSrc)) continue;
+                    var lowSrc = src.toLowerCase();
+                    if (Scraper.isGarbageImage(lowSrc)) continue;
 
-                         if (img.className && img.className.indexOf('vm') !== -1) continue;
-                         var originalName = '';
-                         if (!originalName || originalName.length < 3) originalName = img.getAttribute('title') || '';
-                         if (!originalName || originalName.length < 3) originalName = img.getAttribute('alt') || '';
-                         images.push({ url: src, floor: floor, date: date, fileName: originalName });
-                    }
+                    if (img.className && img.className.indexOf('vm') !== -1) continue;
+                    var originalName = '';
+                    if (!originalName || originalName.length < 3) originalName = img.getAttribute('title') || '';
+                    if (!originalName || originalName.length < 3) originalName = img.getAttribute('alt') || '';
+                    images.push({ url: src, floor: floor, date: date, fileName: originalName });
                 }
             });
             return images;
