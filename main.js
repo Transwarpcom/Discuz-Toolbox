@@ -1158,6 +1158,7 @@
             }
             else { var mFloor = div.querySelector('.authi li.grey em');
                 if (mFloor) floor = mFloor.innerText.replace(REGEX_CONTROL_CHARS, '').replace('^#', '').trim(); }
+            div._gm_floor = floor;
             return floor;
         },
         getDate: function(div) {
