@@ -963,7 +963,7 @@
                             walk(child);
                             child = child.nextSibling;
                         }
-                        if (regexBlockTags.test(tag)) chunks.push('\n');
+                        if (REGEX_BLOCK_TAGS.test(tag)) chunks.push('\n');
                     }
                 } else if (node.nodeType === 3) { // Text
                     chunks.push(node.nodeValue);
@@ -1265,6 +1265,7 @@
     // 6. UI 初始化
     var UI = {
         lastFocusedInput: null, 
+        b: null, b2: null, b3: null,
  
         init: function() {
             var tryRender = function() { if(document.body) { UI.render();
@@ -1287,6 +1288,7 @@
                 var bMain = document.createElement('button'); bMain.className = 'gm-btn-split-l'; bMain.id='gm-btn-batch-run';
                 bMain.innerText = '⚡ 批量下载'; bMain.style.backgroundColor = '#8e44ad';
                 bMain.onclick = function() { SpaceCrawler.startScan(); }; // 点击左侧直接开始
+                UI.b3 = bMain;
                 
                 var bSet = document.createElement('button');
                 bSet.className = 'gm-btn-split-r'; bSet.innerText = '⚙️'; bSet.style.backgroundColor='#7d3c98';
@@ -1307,6 +1309,7 @@
                 var b1 = document.createElement('button'); b1.className = 'gm-btn-split-l'; b1.id='gm-btn-text'; b1.innerHTML = '💾 文本 <span class="gm-shortcut-hint">Alt+D</span>'; b1.style.backgroundColor='#3498db';
                 b1.onclick = function(){ Scraper.init('download', true); };
                 g1.appendChild(b1);
+                UI.b = b1;
                 var s1 = document.createElement('button'); s1.className = 'gm-btn-split-r'; s1.innerText='⚙️'; s1.style.backgroundColor='#2980b9';
                 s1.setAttribute('aria-label', '下载设置'); s1.title = '下载设置';
                 s1.onclick = function(e){ e.stopPropagation();
@@ -1319,6 +1322,7 @@
                 b2.innerHTML = '🖼️ 图片 <span class="gm-shortcut-hint">Alt+I</span>'; b2.style.backgroundColor='#9b59b6';
                 b2.onclick = function(){ Scraper.init('images', true); };
                 g2.appendChild(b2);
+                UI.b2 = b2;
                 var s2 = document.createElement('button');
                 s2.className = 'gm-btn-split-r'; s2.innerText='⚙️'; s2.style.backgroundColor='#8e44ad';
                 s2.setAttribute('aria-label', '下载设置'); s2.title = '下载设置';
@@ -1578,24 +1582,14 @@
             }
         },
         resetButtons: function() {
-             var b = document.getElementById('gm-btn-text');
-             if(b) { b.childNodes[0].nodeValue = '💾 文本 '; b.style.backgroundColor='#3498db'; }
-             var b2 = document.getElementById('gm-btn-img');
-             if(b2) { b2.childNodes[0].nodeValue = '🖼️ 图片 '; b2.style.backgroundColor='#9b59b6'; }
-             var b3 = document.getElementById('gm-btn-batch-run');
-             if(b3) { b3.innerText = '⚡ 批量下载'; b3.disabled = false; b3.style.backgroundColor='#8e44ad';
-             }
+            if (UI.b) { UI.b.childNodes[0].nodeValue = '💾 文本 '; UI.b.style.backgroundColor='#3498db'; }
+            if (UI.b2) { UI.b2.childNodes[0].nodeValue = '🖼️ 图片 '; UI.b2.style.backgroundColor='#9b59b6'; }
+            if (UI.b3) { UI.b3.innerText = '⚡ 批量下载'; UI.b3.disabled = false; UI.b3.style.backgroundColor='#8e44ad'; }
         },
         updateStatus: function(txt, col) {
-             var b = document.getElementById('gm-btn-text');
-             if(App.currentMode === 'download' && b) { b.childNodes[0].nodeValue = txt; b.style.backgroundColor = col;
-             }
-             var b2 = document.getElementById('gm-btn-img');
-             if(App.currentMode === 'images' && b2) { b2.childNodes[0].nodeValue = txt; b2.style.backgroundColor = col;
-             }
-             var b3 = document.getElementById('gm-btn-batch-run');
-             if(b3) { b3.innerText = txt; b3.style.backgroundColor = col; b3.disabled = true;
-             }
+             if (App.currentMode === 'download' && UI.b) { UI.b.childNodes[0].nodeValue = txt; UI.b.style.backgroundColor = col; }
+             if (App.currentMode === 'images' && UI.b2) { UI.b2.childNodes[0].nodeValue = txt; UI.b2.style.backgroundColor = col; }
+             if (UI.b3) { UI.b3.innerText = txt; UI.b3.style.backgroundColor = col; UI.b3.disabled = true; }
         },
         showProgress: function() { document.getElementById('gm-progress-container').style.display='block';
         },
