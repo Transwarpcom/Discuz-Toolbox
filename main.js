@@ -54,6 +54,7 @@
             paragraphSpacing: 60,
             scrollMode: 'vertical',
             animationSpeed: 0.3,
+            clickAction: 'nextPage',
             
             // 抓取配置
             tplTextFolder: '{{author}}',
@@ -351,6 +352,7 @@
         threadStarterId: '0',
         isAuthorOnly: false,
         authorOnlyStyleEl: null,
+        autoScrollTimer: null,
 
         open: function() {
             // 尝试识别楼主ID
@@ -416,6 +418,7 @@
                 '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><button class="gm-stepper-btn" id="btn-width-minus">-</button><input type="text" id="inp-width" style="flex: 1; text-align: center;"><button class="gm-stepper-btn" id="btn-width-plus">+</button></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">滚动</span><div class="gm-set-ctrl"><select id="inp-scroll"><option value="vertical">上下</option><option value="horizontal">左右</option></select></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">动画</span><div class="gm-set-ctrl"><input type="range" id="inp-animation" min="0" max="1" step="0.1"></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">点击</span><div class="gm-set-ctrl"><select id="inp-click"><option value="nextPage">下一页</option><option value="autoScroll">自动</option><option value="doNothing">不翻页</option><option value="fixed">固定</option></select></div></div>',
                 '</div>'
             ].join('');
         },
@@ -494,6 +497,10 @@
                 this.authorOnlyStyleEl.remove();
                 this.authorOnlyStyleEl = null;
             }
+            if (this.autoScrollTimer) {
+                clearInterval(this.autoScrollTimer);
+                this.autoScrollTimer = null;
+            }
         },
         bindEvents: function() {
             document.getElementById('gm-btn-exit').onclick = this.close;
@@ -516,7 +523,7 @@
                     el.oninput = function(e){ App.userConfig[k]=e.target.value; Reader.applyConfig(); };
                 }
             };
-            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing'); bind('inp-scroll', 'scrollMode'); bind('inp-animation', 'animationSpeed');
+            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing'); bind('inp-scroll', 'scrollMode'); bind('inp-animation', 'animationSpeed'); bind('inp-click', 'clickAction');
 
             var fontSelect = document.getElementById('inp-font');
             var fontTextInput = document.getElementById('inp-font-text');
@@ -526,6 +533,47 @@
                     App.userConfig.fontFamily = this.value;
                     Reader.save();
                 };
+            }
+
+            // Click action logic
+            var contentArea = document.getElementById('gm-content-area');
+            if (contentArea) {
+                contentArea.addEventListener('click', function(e) {
+                    // Prevent clicks on links from triggering actions
+                    if (e.target.tagName === 'A') return;
+
+                    var action = App.userConfig.clickAction;
+                    var scrollBox = document.getElementById('gm-reader-scroll-box');
+                    if (!scrollBox) return;
+
+                    switch (action) {
+                        case 'nextPage':
+                            scrollBox.scrollBy({ top: scrollBox.clientHeight * 0.9, behavior: 'smooth' });
+                            break;
+                        case 'autoScroll':
+                            if (Reader.autoScrollTimer) {
+                                clearInterval(Reader.autoScrollTimer);
+                                Reader.autoScrollTimer = null;
+                            } else {
+                                Reader.autoScrollTimer = setInterval(function() {
+                                    scrollBox.scrollBy({ top: 1, behavior: 'smooth' });
+                                }, 50);
+                            }
+                            break;
+                        case 'doNothing':
+                            // Do nothing
+                            break;
+                        case 'fixed':
+                            var clickY = e.clientY;
+                            var screenHeight = window.innerHeight;
+                            if (clickY < screenHeight / 2) {
+                                scrollBox.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else {
+                                scrollBox.scrollTo({ top: scrollBox.scrollHeight, behavior: 'smooth' });
+                            }
+                            break;
+                    }
+                });
             }
 
             document.getElementById('btn-night').onclick = function() { App.userConfig.bgColor='#1a1a1a'; App.userConfig.paperColor='#2c2c2c'; App.userConfig.textColor='#a0a0a0'; Reader.save(); };
