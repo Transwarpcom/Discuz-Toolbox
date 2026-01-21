@@ -343,6 +343,7 @@
     var Reader = {
         threadStarterId: '0',
         isAuthorOnly: false,
+        authorOnlyStyleEl: null,
 
         open: function() {
             // 尝试识别楼主ID
@@ -360,6 +361,11 @@
             this.bindEvents();
             this.applyConfig();
             Keyboard.enableReader();
+
+            // Create a dedicated style element for author filtering
+            this.authorOnlyStyleEl = document.createElement('style');
+            this.authorOnlyStyleEl.id = 'gm-author-only-style';
+            (document.head || document.documentElement).appendChild(this.authorOnlyStyleEl);
         },
         buildHTML: function() {
             var title = App.meta.title || '阅读模式';
@@ -444,6 +450,12 @@
             document.body.style.overflow = '';
             Keyboard.disableReader();
             UI.showPanel();
+
+            // Clean up the dynamically added style element
+            if (this.authorOnlyStyleEl) {
+                this.authorOnlyStyleEl.remove();
+                this.authorOnlyStyleEl = null;
+            }
         },
         bindEvents: function() {
             document.getElementById('gm-btn-exit').onclick = this.close;
@@ -474,24 +486,22 @@
             this.isAuthorOnly = !this.isAuthorOnly;
             var btn = document.getElementById('gm-btn-author-only');
             if (btn) btn.innerText = this.isAuthorOnly ? '👥 查看全部' : '👤 只看楼主';
-
-            var posts = document.querySelectorAll('.gm-post-item');
-            var tocItems = document.querySelectorAll('.gm-toc-item');
+            var overlay = document.getElementById('gm-reader-overlay');
             var targetId = this.threadStarterId;
 
-            var toggleFn = function(list) {
-                list.forEach(function(el) {
-                    var uid = el.getAttribute('data-uid');
-                    if (Reader.isAuthorOnly) {
-                        el.style.display = (uid === targetId) ? '' : 'none';
-                    } else {
-                        el.style.display = '';
+            if (this.isAuthorOnly) {
+                var css = `
+                    #gm-reader-overlay .gm-post-item:not([data-uid="${targetId}"]),
+                    #gm-reader-overlay .gm-toc-item:not([data-uid="${targetId}"]) {
+                        display: none;
                     }
-                });
-            };
-
-            toggleFn(posts);
-            toggleFn(tocItems);
+                `;
+                this.authorOnlyStyleEl.textContent = css;
+                if (overlay) overlay.classList.add('author-only-mode');
+            } else {
+                this.authorOnlyStyleEl.textContent = '';
+                if (overlay) overlay.classList.remove('author-only-mode');
+            }
 
             UI.showToast(this.isAuthorOnly ? '只看楼主' : '查看全部');
         }
