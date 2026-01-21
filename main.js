@@ -329,6 +329,7 @@
                 '.gm-set-label { width: 70px; font-size: 14px; color: #868e96; font-weight: 600; }',
                 '.gm-set-ctrl { flex: 1; display: flex; gap: 12px; align-items: center; min-width: 200px; }',
                 '.gm-set-ctrl select, .gm-set-ctrl input[type=text] { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 8px; background: #fff; font-size: 14px; outline: none; }',
+                '.gm-set-ctrl .gm-stepper-btn { padding: 5px 10px; border: 1px solid #ced4da; background: #fff; cursor: pointer; }',
                 '.gm-theme-btn { flex: 1; padding: 10px; border: 1px solid #dee2e6; background: #fff; border-radius: 8px; cursor: pointer; color: #495057; font-size: 13px; font-weight: 500; }',
                 '.gm-theme-btn.active { background: #e7f5ff; border-color: #228be6; color: #1971c2; }',
                 '.gm-post-item { margin-bottom: 60px; }',
@@ -406,7 +407,7 @@
                 '   <div class="gm-set-row"><span class="gm-set-label">字重</span><div class="gm-set-ctrl"><input type="range" id="inp-weight" min="100" max="900" step="100"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">行距</span><div class="gm-set-ctrl"><input type="range" id="inp-line" min="1.4" max="2.4" step="0.1"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字距</span><div class="gm-set-ctrl"><input type="range" id="inp-spacing" min="0" max="1" step="0.05"></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><select id="inp-width"><option value="600px">窄版</option><option value="860px">舒适</option><option value="1000px">宽屏</option><option value="90%">全幅</option></select></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><button class="gm-stepper-btn" id="btn-width-minus">-</button><input type="text" id="inp-width" style="flex: 1; text-align: center;"><button class="gm-stepper-btn" id="btn-width-plus">+</button></div></div>',
                 '</div>'
             ].join('');
         },
@@ -501,6 +502,31 @@
             document.getElementById('btn-warm').onclick = function() { App.userConfig.bgColor='#f7f1e3'; App.userConfig.paperColor='#fffef8'; App.userConfig.textColor='#2d3436'; Reader.save(); };
             document.getElementById('btn-sepia').onclick = function() { App.userConfig.bgColor='#fbf0d9'; App.userConfig.paperColor='#f4e8c8'; App.userConfig.textColor='#5b4636'; Reader.save(); };
             document.getElementById('btn-gray').onclick = function() { App.userConfig.bgColor='#e0e0e0'; App.userConfig.paperColor='#f5f5f5'; App.userConfig.textColor='#333333'; Reader.save(); };
+
+            // Width stepper logic
+            var updateWidth = function(newValue) {
+                App.userConfig.widthMode = newValue;
+                Reader.save();
+            };
+
+            document.getElementById('btn-width-minus').onclick = function() {
+                var currentWidth = App.userConfig.widthMode;
+                var numericValue = parseInt(currentWidth);
+                if (currentWidth.includes('px')) {
+                    updateWidth((numericValue - 20) + 'px');
+                } else if (currentWidth.includes('%')) {
+                    updateWidth((numericValue - 5) + '%');
+                }
+            };
+            document.getElementById('btn-width-plus').onclick = function() {
+                var currentWidth = App.userConfig.widthMode;
+                var numericValue = parseInt(currentWidth);
+                if (currentWidth.includes('px')) {
+                    updateWidth((numericValue + 20) + 'px');
+                } else if (currentWidth.includes('%')) {
+                    updateWidth((numericValue + 5) + '%');
+                }
+            };
 
             // Progress bar logic
             var scrollBox = document.getElementById('gm-reader-scroll-box');
