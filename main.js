@@ -153,7 +153,6 @@
                     var buffer = response.response;
                     // Performance: Reuse TextDecoder instance to avoid repeated instantiation overhead
                     if (!cachedDecoder) {
-                        // Optimize: Reuse TextDecoder instance to reduce object creation overhead
                         try {
                             cachedDecoder = new TextDecoder(document.characterSet || 'utf-8');
                         } catch (e) {
