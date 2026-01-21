@@ -36,7 +36,6 @@
         key: 'gm_discuz_assistant_config',
         posKey: 'gm_discuz_assistant_pos',
         historyKey: 'gm_discuz_download_history',
-        scrollPosKey: 'gm_discuz_assistant_scroll_pos',
         isRunning: false,
         isDownloading: false,
         isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
@@ -50,13 +49,6 @@
             fontSize: 18, fontWeight: 400, lineHeight: 1.8,
             fontFamily: "'Microsoft YaHei', 'PingFang SC', sans-serif",
             widthMode: '860px', minLength: 0,
-            letterSpacing: 0,
-            paragraphSpacing: 60,
-            scrollMode: 'vertical',
-            animationSpeed: 0.3,
-            clickAction: 'nextPage',
-            replaceEnabled: false,
-            replaceRules: [],
             
             // 抓取配置
             tplTextFolder: '{{author}}',
@@ -161,6 +153,7 @@
                     var buffer = response.response;
                     // Performance: Reuse TextDecoder instance to avoid repeated instantiation overhead
                     if (!cachedDecoder) {
+                        // Optimize: Reuse TextDecoder instance to reduce object creation overhead
                         try {
                             cachedDecoder = new TextDecoder(document.characterSet || 'utf-8');
                         } catch (e) {
@@ -181,6 +174,7 @@
             });
         },
         sanitizeFilename: function(name) {
+            // Optimize: early return for empty string and ensure string type
             if (!name) return '';
             return String(name).replace(REGEX_INVALID_CHARS, '_')
                        .replace(REGEX_CONTROL_CHARS, '')
@@ -198,6 +192,7 @@
         },
         renderTemplate: function(tpl, data) {
             if (!tpl) return "";
+            // Optimize: use single regex replace instead of loop + new RegExp
             return Utils.sanitizeFilename(tpl.replace(REGEX_TEMPLATE, function(match, key) {
                 return (data && key in data) ? String(data[key] || '') : match;
             }));
@@ -274,28 +269,6 @@
                 App.downloadHistory.clear();
                 Utils.debouncedSaveHistory(); UI.showToast("🗑️ 記錄已清空");
             }
-        },
-        applyReplacements: function(text) {
-            if (!App.userConfig.replaceEnabled || !App.userConfig.replaceRules) {
-                return text;
-            }
-            var rules = App.userConfig.replaceRules;
-            for (var i = 0; i < rules.length; i++) {
-                var rule = rules[i];
-                if (rule.pattern) {
-                    try {
-                        if (rule.isRegex) {
-                            var regex = new RegExp(rule.pattern, 'g');
-                            text = text.replace(regex, rule.replacement);
-                        } else {
-                            text = text.replace(rule.pattern, rule.replacement);
-                        }
-                    } catch (e) {
-                        Logger.error('Error applying replacement rule: ', e);
-                    }
-                }
-            }
-            return text;
         }
     };
 
@@ -341,13 +314,13 @@
                 // Reader CSS
                 '#gm-reader-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-color); color: var(--text-color); z-index: 2147483640; font-family: var(--font-family); overflow: hidden; outline: none; line-height: 1.5; }',
                 '#gm-reader-scroll-box { position: relative; z-index: 2147483641; width: 100%; height: 100%; box-sizing: border-box; display: block; overflow-y: auto; padding: 40px 0 120px 0; scroll-behavior: smooth; }',
-                '.gm-content-wrapper { max-width: var(--content-width); margin: 0 auto; padding: 60px 80px; box-sizing: border-box; background-color: var(--paper-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-radius: 8px; min-height: calc(100vh - 100px); }',
-                '@media (max-width: 768px) { .gm-content-wrapper { padding: 30px 20px; max-width: 100%; border-radius: 0; box-shadow: none; } }',
-                '#gm-fab-menu { position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px; border-radius: 25px; background: rgba(33, 37, 41, 0.9); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; z-index: 2147483648; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.3); transition: all var(--animation-duration, 0.3s); backdrop-filter: blur(4px); }',
-                '#gm-reader-toolbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(255,255,255,0.95); color: #333; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-sizing: border-box; transform: translateY(-100%); transition: transform var(--animation-duration, 0.3s) ease; z-index: 2147483649; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }',
+                '.gm-content-wrapper { width: var(--content-width); max-width: 95vw; margin: 0 auto; padding: 60px 80px; box-sizing: border-box; background-color: var(--paper-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-radius: 8px; min-height: calc(100vh - 100px); }',
+                '@media (max-width: 768px) { .gm-content-wrapper { padding: 30px 20px; width: 100% !important; border-radius: 0; box-shadow: none; } }',
+                '#gm-fab-menu { position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px; border-radius: 25px; background: rgba(33, 37, 41, 0.9); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; z-index: 2147483648; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.3); transition: all 0.3s; backdrop-filter: blur(4px); }',
+                '#gm-reader-toolbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(255,255,255,0.95); color: #333; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-sizing: border-box; transform: translateY(-100%); transition: transform 0.3s ease; z-index: 2147483649; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }',
                 '#gm-reader-toolbar.visible { transform: translateY(0); }',
                 '.gm-tool-btn { background: transparent; border: 1px solid #e9ecef; color: #495057; padding: 6px 14px; border-radius: 8px; margin-left: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }',
-                '#gm-reader-toc, #gm-reader-settings { position: fixed; background: rgba(255,255,255,0.95); color: #333; z-index: 2147483649; transition: transform var(--animation-duration, 0.3s); backdrop-filter: blur(12px); }',
+                '#gm-reader-toc, #gm-reader-settings { position: fixed; background: rgba(255,255,255,0.95); color: #333; z-index: 2147483649; transition: transform 0.3s; backdrop-filter: blur(12px); }',
                 '#gm-reader-toc { top: 0; left: 0; bottom: 0; width: 300px; transform: translateX(-100%); display: flex; flex-direction: column; border-right: 1px solid rgba(0,0,0,0.05); }',
                 '#gm-reader-toc.visible { transform: translateX(0); }',
                 '.gm-toc-item { padding: 12px 20px; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.02); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #495057; }',
@@ -357,16 +330,11 @@
                 '.gm-set-label { width: 70px; font-size: 14px; color: #868e96; font-weight: 600; }',
                 '.gm-set-ctrl { flex: 1; display: flex; gap: 12px; align-items: center; min-width: 200px; }',
                 '.gm-set-ctrl select, .gm-set-ctrl input[type=text] { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 8px; background: #fff; font-size: 14px; outline: none; }',
-                '.gm-set-ctrl .gm-stepper-btn { padding: 5px 10px; border: 1px solid #ced4da; background: #fff; cursor: pointer; }',
                 '.gm-theme-btn { flex: 1; padding: 10px; border: 1px solid #dee2e6; background: #fff; border-radius: 8px; cursor: pointer; color: #495057; font-size: 13px; font-weight: 500; }',
                 '.gm-theme-btn.active { background: #e7f5ff; border-color: #228be6; color: #1971c2; }',
-                '.gm-post-item { margin-bottom: var(--paragraph-spacing, 60px); }',
+                '.gm-post-item { margin-bottom: 60px; }',
                 '.gm-post-meta { font-size: 12px; color: #adb5bd; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; font-family: system-ui, sans-serif; }',
-                '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: var(--letter-spacing, 0.03em) !important; }',
-                '.horizontal-scroll { overflow-x: auto; overflow-y: hidden; white-space: nowrap; scroll-snap-type: x mandatory; }',
-                '.horizontal-scroll .gm-content-wrapper { display: inline-block; width: 80vw; white-space: normal; vertical-align: top; scroll-snap-align: start; }',
-                '#gm-reader-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 2147483650; pointer-events: none; }',
-                '#gm-reader-progress-bar { width: 0%; height: 100%; background-color: #3498db; transition: width 0.1s ease-out; }'
+                '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: 0.03em; }'
             ];
             Utils.safeAddStyle(css.join('\n'));
         }
@@ -375,8 +343,6 @@
     var Reader = {
         threadStarterId: '0',
         isAuthorOnly: false,
-        authorOnlyStyleEl: null,
-        autoScrollTimer: null,
 
         open: function() {
             // 尝试识别楼主ID
@@ -394,31 +360,12 @@
             this.bindEvents();
             this.applyConfig();
             Keyboard.enableReader();
-
-            // Create a dedicated style element for author filtering
-            this.authorOnlyStyleEl = document.createElement('style');
-            this.authorOnlyStyleEl.id = 'gm-author-only-style';
-            (document.head || document.documentElement).appendChild(this.authorOnlyStyleEl);
-
-            // Restore scroll position
-            try {
-                var savedPos = localStorage.getItem(App.scrollPosKey);
-                if (savedPos) {
-                    var data = JSON.parse(savedPos);
-                    if (data.tid === App.meta.tid && data.position > 0) {
-                        setTimeout(function() {
-                            document.getElementById('gm-reader-scroll-box').scrollTop = data.position;
-                        }, 100);
-                    }
-                }
-            } catch(e) {}
         },
         buildHTML: function() {
             var title = App.meta.title || '阅读模式';
             var fonts = [ { name: "微软雅黑", val: "'Microsoft YaHei', 'PingFang SC', sans-serif" }, { name: "宋体", val: "'SimSun', serif" }, { name: "楷体", val: "'KaiTi', serif" }, { name: "系统默认", val: "sans-serif" } ];
             var fontOpts = fonts.map(function(f) { return '<option value="' + f.val + '">' + f.name + '</option>'; }).join('');
             return [
-                '<div id="gm-reader-progress-container"><div id="gm-reader-progress-bar"></div></div>',
                 '<div id="gm-reader-scroll-box"><div class="gm-content-wrapper" id="gm-content-area"></div></div>',
                 '<div id="gm-fab-menu">☰</div>',
                 '<div id="gm-reader-toolbar">',
@@ -432,17 +379,11 @@
                 '</div>',
                 '<div id="gm-reader-toc"><div class="gm-toc-header" style="padding:15px;font-weight:bold;border-bottom:1px solid #eee;">目录</div><div id="gm-toc-list" style="flex:1;overflow-y:auto;"></div></div>',
                 '<div id="gm-reader-settings">',
-                '   <div class="gm-set-row"><span class="gm-set-label">配色</span><div class="gm-set-ctrl"><button class="gm-theme-btn" id="btn-warm">📖 羊皮</button><button class="gm-theme-btn" id="btn-sepia">📜 泛黄</button><button class="gm-theme-btn" id="btn-gray">👓 灰度</button><button class="gm-theme-btn" id="btn-night">🌙 极夜</button></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">字体</span><div class="gm-set-ctrl" style="display: flex; align-items: center; gap: 8px;"><input type="text" id="inp-font-text" style="flex: 1;"><select id="inp-font" style="width: 100px;">' + fontOpts + '</select><input type="color" id="inp-color" style="width: 40px; height: 30px; padding: 2px; border: none; background: transparent;"></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">配色</span><div class="gm-set-ctrl"><button class="gm-theme-btn" id="btn-warm">📖 羊皮</button><button class="gm-theme-btn" id="btn-night">🌙 极夜</button></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">字体</span><div class="gm-set-ctrl"><select id="inp-font">' + fontOpts + '</select></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字号</span><div class="gm-set-ctrl"><input type="range" id="inp-size" min="14" max="32" step="1"></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">字重</span><div class="gm-set-ctrl"><input type="range" id="inp-weight" min="100" max="900" step="100"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">行距</span><div class="gm-set-ctrl"><input type="range" id="inp-line" min="1.4" max="2.4" step="0.1"></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">字距</span><div class="gm-set-ctrl"><input type="range" id="inp-spacing" min="0" max="1" step="0.05"></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">段距</span><div class="gm-set-ctrl"><input type="range" id="inp-paragraph" min="20" max="120" step="10"></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><button class="gm-stepper-btn" id="btn-width-minus">-</button><input type="text" id="inp-width" style="flex: 1; text-align: center;"><button class="gm-stepper-btn" id="btn-width-plus">+</button></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">滚动</span><div class="gm-set-ctrl"><select id="inp-scroll"><option value="vertical">上下</option><option value="horizontal">左右</option></select></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">动画</span><div class="gm-set-ctrl"><input type="range" id="inp-animation" min="0" max="1" step="0.1"></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">点击</span><div class="gm-set-ctrl"><select id="inp-click"><option value="nextPage">下一页</option><option value="autoScroll">自动</option><option value="doNothing">不翻页</option><option value="fixed">固定</option></select></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><select id="inp-width"><option value="600px">窄版</option><option value="860px">舒适</option><option value="1000px">宽屏</option><option value="90%">全幅</option></select></div></div>',
                 '</div>'
             ].join('');
         },
@@ -493,20 +434,8 @@
             ov.style.setProperty('--line-height', c.lineHeight);
             ov.style.setProperty('--font-family', c.fontFamily);
             ov.style.setProperty('--content-width', c.widthMode);
-            ov.style.setProperty('--letter-spacing', c.letterSpacing + 'em');
-            ov.style.setProperty('--paragraph-spacing', c.paragraphSpacing + 'px');
-            ov.style.setProperty('--animation-duration', c.animationSpeed + 's');
             var setVal = function(id, v) { var e=document.getElementById(id); if(e) e.value=v; };
-            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor); setVal('inp-font-text', c.fontFamily); setVal('inp-paragraph', c.paragraphSpacing); setVal('inp-scroll', c.scrollMode); setVal('inp-animation', c.animationSpeed);
-
-            var scrollBox = document.getElementById('gm-reader-scroll-box');
-            if (scrollBox) {
-                if (c.scrollMode === 'horizontal') {
-                    scrollBox.classList.add('horizontal-scroll');
-                } else {
-                    scrollBox.classList.remove('horizontal-scroll');
-                }
-            }
+            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily);
         },
         save: function() { Utils.debouncedSaveConfig(); this.applyConfig(); },
         close: function() {
@@ -515,16 +444,6 @@
             document.body.style.overflow = '';
             Keyboard.disableReader();
             UI.showPanel();
-
-            // Clean up the dynamically added style element
-            if (this.authorOnlyStyleEl) {
-                this.authorOnlyStyleEl.remove();
-                this.authorOnlyStyleEl = null;
-            }
-            if (this.autoScrollTimer) {
-                clearInterval(this.autoScrollTimer);
-                this.autoScrollTimer = null;
-            }
         },
         bindEvents: function() {
             document.getElementById('gm-btn-exit').onclick = this.close;
@@ -547,138 +466,32 @@
                     el.oninput = function(e){ App.userConfig[k]=e.target.value; Reader.applyConfig(); };
                 }
             };
-            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing'); bind('inp-scroll', 'scrollMode'); bind('inp-animation', 'animationSpeed'); bind('inp-click', 'clickAction');
-
-            var fontSelect = document.getElementById('inp-font');
-            var fontTextInput = document.getElementById('inp-font-text');
-            if (fontSelect && fontTextInput) {
-                fontSelect.onchange = function() {
-                    fontTextInput.value = this.value;
-                    App.userConfig.fontFamily = this.value;
-                    Reader.save();
-                };
-            }
-
-            // Click action logic
-            var contentArea = document.getElementById('gm-content-area');
-            if (contentArea) {
-                contentArea.addEventListener('click', function(e) {
-                    // Prevent clicks on links from triggering actions
-                    if (e.target.tagName === 'A') return;
-
-                    var action = App.userConfig.clickAction;
-                    var scrollBox = document.getElementById('gm-reader-scroll-box');
-                    if (!scrollBox) return;
-
-                    switch (action) {
-                        case 'nextPage':
-                            scrollBox.scrollBy({ top: scrollBox.clientHeight * 0.9, behavior: 'smooth' });
-                            break;
-                        case 'autoScroll':
-                            if (Reader.autoScrollTimer) {
-                                clearInterval(Reader.autoScrollTimer);
-                                Reader.autoScrollTimer = null;
-                            } else {
-                                Reader.autoScrollTimer = setInterval(function() {
-                                    scrollBox.scrollBy({ top: 1, behavior: 'smooth' });
-                                }, 50);
-                            }
-                            break;
-                        case 'doNothing':
-                            // Do nothing
-                            break;
-                        case 'fixed':
-                            var clickY = e.clientY;
-                            var screenHeight = window.innerHeight;
-                            if (clickY < screenHeight / 2) {
-                                scrollBox.scrollTo({ top: 0, behavior: 'smooth' });
-                            } else {
-                                scrollBox.scrollTo({ top: scrollBox.scrollHeight, behavior: 'smooth' });
-                            }
-                            break;
-                    }
-                });
-            }
-
+            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily');
             document.getElementById('btn-night').onclick = function() { App.userConfig.bgColor='#1a1a1a'; App.userConfig.paperColor='#2c2c2c'; App.userConfig.textColor='#a0a0a0'; Reader.save(); };
             document.getElementById('btn-warm').onclick = function() { App.userConfig.bgColor='#f7f1e3'; App.userConfig.paperColor='#fffef8'; App.userConfig.textColor='#2d3436'; Reader.save(); };
-            document.getElementById('btn-sepia').onclick = function() { App.userConfig.bgColor='#fbf0d9'; App.userConfig.paperColor='#f4e8c8'; App.userConfig.textColor='#5b4636'; Reader.save(); };
-            document.getElementById('btn-gray').onclick = function() { App.userConfig.bgColor='#e0e0e0'; App.userConfig.paperColor='#f5f5f5'; App.userConfig.textColor='#333333'; Reader.save(); };
-
-            // Width stepper logic
-            var updateWidth = function(newValue) {
-                App.userConfig.widthMode = newValue;
-                Reader.save();
-            };
-
-            document.getElementById('btn-width-minus').onclick = function() {
-                var currentWidth = App.userConfig.widthMode;
-                var numericValue = parseInt(currentWidth);
-                if (currentWidth.includes('px')) {
-                    updateWidth((numericValue - 20) + 'px');
-                } else if (currentWidth.includes('%')) {
-                    updateWidth((numericValue - 5) + '%');
-                }
-            };
-            document.getElementById('btn-width-plus').onclick = function() {
-                var currentWidth = App.userConfig.widthMode;
-                var numericValue = parseInt(currentWidth);
-                if (currentWidth.includes('px')) {
-                    updateWidth((numericValue + 20) + 'px');
-                } else if (currentWidth.includes('%')) {
-                    updateWidth((numericValue + 5) + '%');
-                }
-            };
-
-            // Progress bar logic
-            var scrollBox = document.getElementById('gm-reader-scroll-box');
-            var progressBar = document.getElementById('gm-reader-progress-bar');
-            if (scrollBox && progressBar) {
-                var debouncedSave = Utils.debounce(function(scrollTop) {
-                    var scrollData = { tid: App.meta.tid, position: scrollTop };
-                    localStorage.setItem(App.scrollPosKey, JSON.stringify(scrollData));
-                }, 300);
-
-                var ticking = false;
-                scrollBox.onscroll = function() {
-                    if (!ticking) {
-                        window.requestAnimationFrame(function() {
-                            var scrollTop = scrollBox.scrollTop;
-                            var scrollHeight = scrollBox.scrollHeight;
-                            var clientHeight = scrollBox.clientHeight;
-                            var scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
-                            progressBar.style.width = scrollPercent + '%';
-
-                            // Save scroll position
-                            debouncedSave(scrollTop);
-
-                            ticking = false;
-                        });
-                        ticking = true;
-                    }
-                };
-            }
         },
         toggleAuthorOnly: function() {
             this.isAuthorOnly = !this.isAuthorOnly;
             var btn = document.getElementById('gm-btn-author-only');
             if (btn) btn.innerText = this.isAuthorOnly ? '👥 查看全部' : '👤 只看楼主';
-            var overlay = document.getElementById('gm-reader-overlay');
+
+            var posts = document.querySelectorAll('.gm-post-item');
+            var tocItems = document.querySelectorAll('.gm-toc-item');
             var targetId = this.threadStarterId;
 
-            if (this.isAuthorOnly) {
-                var css = `
-                    #gm-reader-overlay .gm-post-item:not([data-uid="${targetId}"]),
-                    #gm-reader-overlay .gm-toc-item:not([data-uid="${targetId}"]) {
-                        display: none;
+            var toggleFn = function(list) {
+                list.forEach(function(el) {
+                    var uid = el.getAttribute('data-uid');
+                    if (Reader.isAuthorOnly) {
+                        el.style.display = (uid === targetId) ? '' : 'none';
+                    } else {
+                        el.style.display = '';
                     }
-                `;
-                this.authorOnlyStyleEl.textContent = css;
-                if (overlay) overlay.classList.add('author-only-mode');
-            } else {
-                this.authorOnlyStyleEl.textContent = '';
-                if (overlay) overlay.classList.remove('author-only-mode');
-            }
+                });
+            };
+
+            toggleFn(posts);
+            toggleFn(tocItems);
 
             UI.showToast(this.isAuthorOnly ? '只看楼主' : '查看全部');
         }
@@ -1150,7 +963,7 @@
                             walk(child);
                             child = child.nextSibling;
                         }
-                        if (REGEX_BLOCK_TAGS.test(tag)) chunks.push('\n');
+                        if (regexBlockTags.test(tag)) chunks.push('\n');
                     }
                 } else if (node.nodeType === 3) { // Text
                     chunks.push(node.nodeValue);
@@ -1181,7 +994,6 @@
                 var contentDiv = div.querySelector('.t_f') || div.querySelector('.pcb');
                 if(contentDiv) {
                     var text = this.extractThreadContent(contentDiv);
-                    text = Utils.applyReplacements(text);
                     
                     // [新增] 提取标题摘要用于目录
                     var firstLine = text.split('\n')[0];
@@ -1196,7 +1008,10 @@
         parseImages: function(doc, postNodes) {
             var images = [];
             // Optimize: Use passed nodes or fetch them
-            var postDivs = postNodes || Scraper.getPostNodes(doc);
+            var postDivs = postNodes;
+            if (!postDivs) {
+                postDivs = Scraper.getPostNodes(doc);
+            }
             
             // Helper to check ancestry safely (ES5 compatible)
             var hasClassInAncestry = function(el, className, limitEl) {
@@ -1336,7 +1151,6 @@
             }
             else { var mFloor = div.querySelector('.authi li.grey em');
                 if (mFloor) floor = mFloor.innerText.replace(REGEX_CONTROL_CHARS, '').replace('^#', '').trim(); }
-            div._gm_floor = floor;
             return floor;
         },
         getDate: function(div) {
@@ -1402,6 +1216,7 @@
                  var postNodes = Scraper.getPostNodes(document);
                  if (App.currentMode === 'images') {
                      var imgs = Scraper.parseImages(document, postNodes);
+                     // Optimize: use push.apply to avoid creating new arrays on every iteration
                      if (imgs.length > 0) Array.prototype.push.apply(App.imgData, imgs);
                  } else {
                      var posts = Scraper.parsePosts(document, postNodes);
@@ -1443,7 +1258,6 @@
     // 6. UI 初始化
     var UI = {
         lastFocusedInput: null, 
-        b: null, b2: null, b3: null,
  
         init: function() {
             var tryRender = function() { if(document.body) { UI.render();
@@ -1451,21 +1265,10 @@
             if(document.body) { tryRender(); }
             document.addEventListener('DOMContentLoaded', tryRender);
             window.addEventListener('load', tryRender);
-            window.addEventListener('resize', Utils.debounce(UI.checkPanelBounds, 200));
         },
         render: function() {
             if (document.getElementById('gm-start-panel')) return;
             var p = document.createElement('div'); p.id = 'gm-start-panel'; p.style.top = '150px'; p.style.left = '20px';
-
-            try {
-                var savedPos = localStorage.getItem(App.posKey);
-                if (savedPos) {
-                    var data = JSON.parse(savedPos);
-                    p.style.left = data.left;
-                    p.style.top = data.top;
-                }
-            } catch(e) {}
-
             p.innerHTML = '<div class="gm-drag-handle">::: 助手 :::</div>';
             var isSpacePage = window.location.href.indexOf('home.php') !== -1 && window.location.href.indexOf('do=thread') !== -1;
             var isForumDisplay = window.location.href.indexOf('mod=forumdisplay') !== -1;
@@ -1477,7 +1280,6 @@
                 var bMain = document.createElement('button'); bMain.className = 'gm-btn-split-l'; bMain.id='gm-btn-batch-run';
                 bMain.innerText = '⚡ 批量下载'; bMain.style.backgroundColor = '#8e44ad';
                 bMain.onclick = function() { SpaceCrawler.startScan(); }; // 点击左侧直接开始
-                UI.b3 = bMain;
                 
                 var bSet = document.createElement('button');
                 bSet.className = 'gm-btn-split-r'; bSet.innerText = '⚙️'; bSet.style.backgroundColor='#7d3c98';
@@ -1498,7 +1300,6 @@
                 var b1 = document.createElement('button'); b1.className = 'gm-btn-split-l'; b1.id='gm-btn-text'; b1.innerHTML = '💾 文本 <span class="gm-shortcut-hint">Alt+D</span>'; b1.style.backgroundColor='#3498db';
                 b1.onclick = function(){ Scraper.init('download', true); };
                 g1.appendChild(b1);
-                UI.b = b1;
                 var s1 = document.createElement('button'); s1.className = 'gm-btn-split-r'; s1.innerText='⚙️'; s1.style.backgroundColor='#2980b9';
                 s1.setAttribute('aria-label', '下载设置'); s1.title = '下载设置';
                 s1.onclick = function(e){ e.stopPropagation();
@@ -1511,7 +1312,6 @@
                 b2.innerHTML = '🖼️ 图片 <span class="gm-shortcut-hint">Alt+I</span>'; b2.style.backgroundColor='#9b59b6';
                 b2.onclick = function(){ Scraper.init('images', true); };
                 g2.appendChild(b2);
-                UI.b2 = b2;
                 var s2 = document.createElement('button');
                 s2.className = 'gm-btn-split-r'; s2.innerText='⚙️'; s2.style.backgroundColor='#8e44ad';
                 s2.setAttribute('aria-label', '下载设置'); s2.title = '下载设置';
@@ -1531,10 +1331,6 @@
             prog.innerHTML = '<div id="gm-progress-bar"></div>'; p.appendChild(prog);
  
             document.body.appendChild(p); UI.makeDraggable(p, p.querySelector('.gm-drag-handle'));
-
-            // Defer boundary check to ensure element is rendered
-            setTimeout(UI.checkPanelBounds, 100);
-
             // 普通模式设置弹窗
             var popup = document.createElement('div'); popup.id = 'gm-folder-popup';
             popup.innerHTML = `
@@ -1542,9 +1338,9 @@
                 
                 <div class="gm-popup-subtitle">高级设置 (全局)</div>
                 <div class="gm-input-group" style="display:flex; gap:10px;">
-                    <div style="flex:1"><label class="gm-input-label" for="inp-tpl-max-threads">并发数</label><input class="gm-popup-input"
+                    <div style="flex:1"><span class="gm-input-label">并发数</span><input class="gm-popup-input"
                     type="number" id="inp-tpl-max-threads" value="${App.userConfig.maxConcurrency}" min="1"></div>
-                    <div style="flex:1"><label class="gm-input-label" for="inp-tpl-download-delay">间隔(ms)</label><input class="gm-popup-input" type="number" id="inp-tpl-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
+                    <div style="flex:1"><span class="gm-input-label">间隔(ms)</span><input class="gm-popup-input" type="number" id="inp-tpl-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
                 </div>
                 <div class="gm-checkbox-row" style="margin-bottom:10px;border-bottom:1px dashed #eee;padding-bottom:10px;">
                     <input type="checkbox" id="gm-opt-single-dup" ${App.userConfig.allowDuplicate?'checked':''}>
@@ -1556,10 +1352,10 @@
                     <label for="gm-opt-retain-name" title="尝试从图片标题提取原始文件名">保留原始文件名 (优先使用 alt/title)</label>
                 </div>
  
-                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-img-folder">图片目录</label><input class="gm-popup-input" id="inp-tpl-img-folder" value="${App.userConfig.tplImgFolder||''}"></div>
-                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-img-file">图片文件名 (备份规则)</label><input class="gm-popup-input" id="inp-tpl-img-file" value="${App.userConfig.tplImgFileName}"></div>
-                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-txt-folder">文本目录</label><input class="gm-popup-input" id="inp-tpl-txt-folder" value="${App.userConfig.tplTextFolder||''}"></div>
-                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-txt-file">文本文件名</label><input class="gm-popup-input" id="inp-tpl-txt-file" value="${App.userConfig.tplTextFileName}"></div>
+                <div class="gm-input-group"><span class="gm-input-label">图片目录</span><input class="gm-popup-input" id="inp-tpl-img-folder" value="${App.userConfig.tplImgFolder||''}"></div>
+                <div class="gm-input-group"><span class="gm-input-label">图片文件名 (备份规则)</span><input class="gm-popup-input" id="inp-tpl-img-file" value="${App.userConfig.tplImgFileName}"></div>
+                <div class="gm-input-group"><span class="gm-input-label">文本目录</span><input class="gm-popup-input" id="inp-tpl-txt-folder" value="${App.userConfig.tplTextFolder||''}"></div>
+                <div class="gm-input-group"><span class="gm-input-label">文本文件名</span><input class="gm-popup-input" id="inp-tpl-txt-file" value="${App.userConfig.tplTextFileName}"></div>
                 <div class="gm-tags-container-small">
                     <div class="gm-tag-small" onclick="UI.insertTag('{{author}}')">昵称</div>
                     <div class="gm-tag-small" onclick="UI.insertTag('{{author_id}}')">UID</div>
@@ -1571,28 +1367,10 @@
                 <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #eee; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:12px;color:#666;">历史记录</span>
                     <div>
-                        <button class="gm-hist-btn" id="gm-btn-import-single" title="导入 .json 历史记录" aria-label="Import History">📥</button>
-                        <button class="gm-hist-btn" id="gm-btn-export-single" title="导出历史记录" aria-label="Export History">📤</button>
-                        <button class="gm-hist-btn danger" id="gm-btn-clear-single" title="清空历史" aria-label="Clear History">🗑️</button>
+                        <button class="gm-hist-btn" id="gm-btn-import-single" title="导入 .json 历史记录">📥</button>
+                        <button class="gm-hist-btn" id="gm-btn-export-single" title="导出历史记录">📤</button>
+                        <button class="gm-hist-btn danger" id="gm-btn-clear-single" title="清空历史">🗑️</button>
                     </div>
-                </div>
-
-                <div class="gm-popup-subtitle">净化规则</div>
-                <div class="gm-checkbox-row">
-                    <input type="checkbox" id="gm-opt-replace-enabled" ${App.userConfig.replaceEnabled?'checked':''}>
-                    <label for="gm-opt-replace-enabled">启用文本替换</label>
-                </div>
-                <div id="gm-replace-rules-container"></div>
-                <div class="gm-input-group" style="display:flex; gap:5px; margin-top:10px;">
-                    <input class="gm-popup-input" id="inp-replace-pattern" placeholder="匹配模式">
-                    <input class="gm-popup-input" id="inp-replace-replacement" placeholder="替换为">
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                    <div class="gm-checkbox-row">
-                        <input type="checkbox" id="inp-replace-is-regex">
-                        <label for="inp-replace-is-regex">正则</label>
-                    </div>
-                    <button class="gm-action-btn" id="btn-add-replace-rule">添加</button>
                 </div>
             `;
             document.body.appendChild(popup);
@@ -1616,59 +1394,6 @@
             document.getElementById('gm-btn-import-single').onclick = Utils.importHistory;
             document.getElementById('gm-btn-export-single').onclick = Utils.exportHistory;
             document.getElementById('gm-btn-clear-single').onclick = Utils.clearHistory;
-
-            // Replacement rules UI logic
-            var renderRules = function() {
-                var container = document.getElementById('gm-replace-rules-container');
-                if (!container) return;
-                container.innerHTML = '';
-                if (App.userConfig.replaceRules) {
-                    App.userConfig.replaceRules.forEach(function(rule, index) {
-                        var ruleDiv = document.createElement('div');
-                        ruleDiv.style = 'display:flex; justify-content:space-between; align-items:center; margin-top:5px;';
-                        ruleDiv.innerHTML = `<span style="font-size:12px;">${rule.pattern} -> ${rule.replacement} ${rule.isRegex ? '(R)' : ''}</span><button class="gm-hist-btn danger" data-index="${index}">-</button>`;
-                        container.appendChild(ruleDiv);
-                    });
-                }
-            };
-
-            var rulesContainer = document.getElementById('gm-replace-rules-container');
-            if (rulesContainer) {
-                rulesContainer.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'BUTTON') {
-                        var index = parseInt(e.target.getAttribute('data-index'));
-                        App.userConfig.replaceRules.splice(index, 1);
-                        Utils.debouncedSaveConfig();
-                        renderRules();
-                    }
-                });
-            }
-
-            var enabledCheck = document.getElementById('gm-opt-replace-enabled');
-            if (enabledCheck) {
-                enabledCheck.onchange = function() {
-                    App.userConfig.replaceEnabled = this.checked;
-                    Utils.debouncedSaveConfig();
-                };
-            }
-
-            var addBtn = document.getElementById('btn-add-replace-rule');
-            if (addBtn) {
-                addBtn.onclick = function() {
-                    var pattern = document.getElementById('inp-replace-pattern').value;
-                    var replacement = document.getElementById('inp-replace-replacement').value;
-                    var isRegex = document.getElementById('inp-replace-is-regex').checked;
-                    if (pattern) {
-                        App.userConfig.replaceRules.push({ pattern: pattern, replacement: replacement, isRegex: isRegex });
-                        Utils.debouncedSaveConfig();
-                        renderRules();
-                        document.getElementById('inp-replace-pattern').value = '';
-                        document.getElementById('inp-replace-replacement').value = '';
-                    }
-                };
-            }
-
-            renderRules();
         },
  
         renderBatchConfigPopup: function() {
@@ -1679,7 +1404,7 @@
                 
                 <div class="gm-popup-subtitle">扫描设置</div>
                 <div class="gm-input-group">
-                    <label class="gm-input-label" for="inp-scan-delay">扫描间隔 (ms)</label>
+                    <span class="gm-input-label">扫描间隔 (ms)</span>
                     <input class="gm-popup-input" type="number" id="inp-scan-delay" value="${App.userConfig.scanDelay}" min="0" step="100">
                 </div>
                 <div class="gm-input-group">
@@ -1701,8 +1426,8 @@
  
                 <div class="gm-popup-subtitle">高级选项</div>
                 <div class="gm-input-group" style="display:flex; gap:10px;">
-                    <div style="flex:1"><label class="gm-input-label" for="inp-max-threads">并发数</label><input class="gm-popup-input" type="number" id="inp-max-threads" value="${App.userConfig.maxConcurrency}" min="1"></div>
-                    <div style="flex:1"><label class="gm-input-label" for="inp-download-delay">间隔(ms)</label><input class="gm-popup-input" type="number" id="inp-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
+                    <div style="flex:1"><span class="gm-input-label">并发数</span><input class="gm-popup-input" type="number" id="inp-max-threads" value="${App.userConfig.maxConcurrency}" min="1"></div>
+                    <div style="flex:1"><span class="gm-input-label">间隔(ms)</span><input class="gm-popup-input" type="number" id="inp-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
                 </div>
                 <div class="gm-checkbox-row">
                     <input type="checkbox" id="gm-opt-dup" ${App.userConfig.allowDuplicate?'checked':''}>
@@ -1714,20 +1439,20 @@
                 </div>
                 
                 <div class="gm-input-group" style="margin-top:10px;">
-                    <label class="gm-input-label" for="inp-batch-img-folder">批量图片/视频目录</label>
+                    <span class="gm-input-label">批量图片/视频目录</span>
                     <input class="gm-popup-input" id="inp-batch-img-folder" value="${App.userConfig.batchImgFolder||''}">
                 </div>
                 <div class="gm-input-group">
-                    <label class="gm-input-label" for="inp-batch-img-file">批量图片文件名 (备份规则)</label>
+                    <span class="gm-input-label">批量图片文件名 (备份规则)</span>
                     <input class="gm-popup-input" id="inp-batch-img-file" value="${App.userConfig.batchImgFileName||''}">
                 </div>
  
                 <div class="gm-input-group">
-                    <label class="gm-input-label" for="inp-batch-txt-folder">批量文本目录</label>
+                    <span class="gm-input-label">批量文本目录</span>
                     <input class="gm-popup-input" id="inp-batch-txt-folder" value="${App.userConfig.batchTextFolder||''}">
                 </div>
                 <div class="gm-input-group">
-                    <label class="gm-input-label" for="inp-batch-txt-file">批量文本文件名</label>
+                    <span class="gm-input-label">批量文本文件名</span>
                     <input class="gm-popup-input" id="inp-batch-txt-file" value="${App.userConfig.batchTextFileName||''}">
                 </div>
                 
@@ -1846,14 +1571,24 @@
             }
         },
         resetButtons: function() {
-            if (UI.b) { UI.b.childNodes[0].nodeValue = '💾 文本 '; UI.b.style.backgroundColor='#3498db'; }
-            if (UI.b2) { UI.b2.childNodes[0].nodeValue = '🖼️ 图片 '; UI.b2.style.backgroundColor='#9b59b6'; }
-            if (UI.b3) { UI.b3.innerText = '⚡ 批量下载'; UI.b3.disabled = false; UI.b3.style.backgroundColor='#8e44ad'; }
+             var b = document.getElementById('gm-btn-text');
+             if(b) { b.childNodes[0].nodeValue = '💾 文本 '; b.style.backgroundColor='#3498db'; }
+             var b2 = document.getElementById('gm-btn-img');
+             if(b2) { b2.childNodes[0].nodeValue = '🖼️ 图片 '; b2.style.backgroundColor='#9b59b6'; }
+             var b3 = document.getElementById('gm-btn-batch-run');
+             if(b3) { b3.innerText = '⚡ 批量下载'; b3.disabled = false; b3.style.backgroundColor='#8e44ad';
+             }
         },
         updateStatus: function(txt, col) {
-             if (App.currentMode === 'download' && UI.b) { UI.b.childNodes[0].nodeValue = txt; UI.b.style.backgroundColor = col; }
-             if (App.currentMode === 'images' && UI.b2) { UI.b2.childNodes[0].nodeValue = txt; UI.b2.style.backgroundColor = col; }
-             if (UI.b3) { UI.b3.innerText = txt; UI.b3.style.backgroundColor = col; UI.b3.disabled = true; }
+             var b = document.getElementById('gm-btn-text');
+             if(App.currentMode === 'download' && b) { b.childNodes[0].nodeValue = txt; b.style.backgroundColor = col;
+             }
+             var b2 = document.getElementById('gm-btn-img');
+             if(App.currentMode === 'images' && b2) { b2.childNodes[0].nodeValue = txt; b2.style.backgroundColor = col;
+             }
+             var b3 = document.getElementById('gm-btn-batch-run');
+             if(b3) { b3.innerText = txt; b3.style.backgroundColor = col; b3.disabled = true;
+             }
         },
         showProgress: function() { document.getElementById('gm-progress-container').style.display='block';
         },
@@ -1885,6 +1620,7 @@
                         rafId = requestAnimationFrame(function() {
                             var dx = currentX - startX;
                             var dy = currentY - startY;
+                            // Optimize: Use transform for smooth 60fps drag without layout thrashing
                             el.style.transform = 'translate3d(' + dx + 'px, ' + dy + 'px, 0)';
                             ticking = false;
                         });
@@ -1902,51 +1638,13 @@
                     var dx = currentX - startX;
                     var dy = currentY - startY;
                     el.style.transform = '';
-                    var finalLeft = (startLeft + dx) + "px";
-                    var finalTop = (startTop + dy) + "px";
-                    el.style.left = finalLeft;
-                    el.style.top = finalTop;
-
-                    // Save final position
-                    localStorage.setItem(App.posKey, JSON.stringify({ left: finalLeft, top: finalTop }));
+                    el.style.left = (startLeft + dx) + "px";
+                    el.style.top = (startTop + dy) + "px";
                 };
 
                 document.addEventListener('mousemove', onMove, { passive: false });
                 document.addEventListener('mouseup', onUp);
             };
-        },
-        checkPanelBounds: function() {
-            var p = document.getElementById('gm-start-panel');
-            if (!p) return;
-            var rect = p.getBoundingClientRect();
-            var newLeft = p.offsetLeft;
-            var newTop = p.offsetTop;
-            var changed = false;
-
-            if (rect.right > window.innerWidth) {
-                newLeft = window.innerWidth - rect.width;
-                changed = true;
-            }
-            if (rect.bottom > window.innerHeight) {
-                newTop = window.innerHeight - rect.height;
-                changed = true;
-            }
-            if (newLeft < 0) {
-                newLeft = 0;
-                changed = true;
-            }
-            if (newTop < 0) {
-                newTop = 0;
-                changed = true;
-            }
-
-            if (changed) {
-                var finalLeft = newLeft + 'px';
-                var finalTop = newTop + 'px';
-                p.style.left = finalLeft;
-                p.style.top = finalTop;
-                localStorage.setItem(App.posKey, JSON.stringify({ left: finalLeft, top: finalTop }));
-            }
         }
     };
     
