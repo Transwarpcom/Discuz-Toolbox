@@ -1229,7 +1229,6 @@
                  var postNodes = Scraper.getPostNodes(document);
                  if (App.currentMode === 'images') {
                      var imgs = Scraper.parseImages(document, postNodes);
-                     // Optimize: use push.apply to avoid creating new arrays on every iteration
                      if (imgs.length > 0) Array.prototype.push.apply(App.imgData, imgs);
                  } else {
                      var posts = Scraper.parsePosts(document, postNodes);
