@@ -1322,10 +1322,21 @@
             if(document.body) { tryRender(); }
             document.addEventListener('DOMContentLoaded', tryRender);
             window.addEventListener('load', tryRender);
+            window.addEventListener('resize', Utils.debounce(UI.checkPanelBounds, 200));
         },
         render: function() {
             if (document.getElementById('gm-start-panel')) return;
             var p = document.createElement('div'); p.id = 'gm-start-panel'; p.style.top = '150px'; p.style.left = '20px';
+
+            try {
+                var savedPos = localStorage.getItem(App.posKey);
+                if (savedPos) {
+                    var data = JSON.parse(savedPos);
+                    p.style.left = data.left;
+                    p.style.top = data.top;
+                }
+            } catch(e) {}
+
             p.innerHTML = '<div class="gm-drag-handle">::: 助手 :::</div>';
             var isSpacePage = window.location.href.indexOf('home.php') !== -1 && window.location.href.indexOf('do=thread') !== -1;
             var isForumDisplay = window.location.href.indexOf('mod=forumdisplay') !== -1;
@@ -1391,6 +1402,10 @@
             prog.innerHTML = '<div id="gm-progress-bar"></div>'; p.appendChild(prog);
  
             document.body.appendChild(p); UI.makeDraggable(p, p.querySelector('.gm-drag-handle'));
+
+            // Defer boundary check to ensure element is rendered
+            setTimeout(UI.checkPanelBounds, 100);
+
             // 普通模式设置弹窗
             var popup = document.createElement('div'); popup.id = 'gm-folder-popup';
             popup.innerHTML = `
@@ -1687,13 +1702,51 @@
                     var dx = currentX - startX;
                     var dy = currentY - startY;
                     el.style.transform = '';
-                    el.style.left = (startLeft + dx) + "px";
-                    el.style.top = (startTop + dy) + "px";
+                    var finalLeft = (startLeft + dx) + "px";
+                    var finalTop = (startTop + dy) + "px";
+                    el.style.left = finalLeft;
+                    el.style.top = finalTop;
+
+                    // Save final position
+                    localStorage.setItem(App.posKey, JSON.stringify({ left: finalLeft, top: finalTop }));
                 };
 
                 document.addEventListener('mousemove', onMove, { passive: false });
                 document.addEventListener('mouseup', onUp);
             };
+        },
+        checkPanelBounds: function() {
+            var p = document.getElementById('gm-start-panel');
+            if (!p) return;
+            var rect = p.getBoundingClientRect();
+            var newLeft = p.offsetLeft;
+            var newTop = p.offsetTop;
+            var changed = false;
+
+            if (rect.right > window.innerWidth) {
+                newLeft = window.innerWidth - rect.width;
+                changed = true;
+            }
+            if (rect.bottom > window.innerHeight) {
+                newTop = window.innerHeight - rect.height;
+                changed = true;
+            }
+            if (newLeft < 0) {
+                newLeft = 0;
+                changed = true;
+            }
+            if (newTop < 0) {
+                newTop = 0;
+                changed = true;
+            }
+
+            if (changed) {
+                var finalLeft = newLeft + 'px';
+                var finalTop = newTop + 'px';
+                p.style.left = finalLeft;
+                p.style.top = finalTop;
+                localStorage.setItem(App.posKey, JSON.stringify({ left: finalLeft, top: finalTop }));
+            }
         }
     };
     
