@@ -1353,9 +1353,9 @@
                 
                 <div class="gm-popup-subtitle">高级设置 (全局)</div>
                 <div class="gm-input-group" style="display:flex; gap:10px;">
-                    <div style="flex:1"><span class="gm-input-label">并发数</span><input class="gm-popup-input" 
+                    <div style="flex:1"><label class="gm-input-label" for="inp-tpl-max-threads">并发数</label><input class="gm-popup-input"
                     type="number" id="inp-tpl-max-threads" value="${App.userConfig.maxConcurrency}" min="1"></div>
-                    <div style="flex:1"><span class="gm-input-label">间隔(ms)</span><input class="gm-popup-input" type="number" id="inp-tpl-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
+                    <div style="flex:1"><label class="gm-input-label" for="inp-tpl-download-delay">间隔(ms)</label><input class="gm-popup-input" type="number" id="inp-tpl-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
                 </div>
                 <div class="gm-checkbox-row" style="margin-bottom:10px;border-bottom:1px dashed #eee;padding-bottom:10px;">
                     <input type="checkbox" id="gm-opt-single-dup" ${App.userConfig.allowDuplicate?'checked':''}>
@@ -1367,10 +1367,10 @@
                     <label for="gm-opt-retain-name" title="尝试从图片标题提取原始文件名">保留原始文件名 (优先使用 alt/title)</label>
                 </div>
  
-                <div class="gm-input-group"><span class="gm-input-label">图片目录</span><input class="gm-popup-input" id="inp-tpl-img-folder" value="${App.userConfig.tplImgFolder||''}"></div>
-                <div class="gm-input-group"><span class="gm-input-label">图片文件名 (备份规则)</span><input class="gm-popup-input" id="inp-tpl-img-file" value="${App.userConfig.tplImgFileName}"></div>
-                <div class="gm-input-group"><span class="gm-input-label">文本目录</span><input class="gm-popup-input" id="inp-tpl-txt-folder" value="${App.userConfig.tplTextFolder||''}"></div>
-                <div class="gm-input-group"><span class="gm-input-label">文本文件名</span><input class="gm-popup-input" id="inp-tpl-txt-file" value="${App.userConfig.tplTextFileName}"></div>
+                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-img-folder">图片目录</label><input class="gm-popup-input" id="inp-tpl-img-folder" value="${App.userConfig.tplImgFolder||''}"></div>
+                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-img-file">图片文件名 (备份规则)</label><input class="gm-popup-input" id="inp-tpl-img-file" value="${App.userConfig.tplImgFileName}"></div>
+                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-txt-folder">文本目录</label><input class="gm-popup-input" id="inp-tpl-txt-folder" value="${App.userConfig.tplTextFolder||''}"></div>
+                <div class="gm-input-group"><label class="gm-input-label" for="inp-tpl-txt-file">文本文件名</label><input class="gm-popup-input" id="inp-tpl-txt-file" value="${App.userConfig.tplTextFileName}"></div>
                 <div class="gm-tags-container-small">
                     <div class="gm-tag-small" onclick="UI.insertTag('{{author}}')">昵称</div>
                     <div class="gm-tag-small" onclick="UI.insertTag('{{author_id}}')">UID</div>
@@ -1419,7 +1419,7 @@
                 
                 <div class="gm-popup-subtitle">扫描设置</div>
                 <div class="gm-input-group">
-                    <span class="gm-input-label">扫描间隔 (ms)</span>
+                    <label class="gm-input-label" for="inp-scan-delay">扫描间隔 (ms)</label>
                     <input class="gm-popup-input" type="number" id="inp-scan-delay" value="${App.userConfig.scanDelay}" min="0" step="100">
                 </div>
                 <div class="gm-input-group">
@@ -1441,8 +1441,8 @@
  
                 <div class="gm-popup-subtitle">高级选项</div>
                 <div class="gm-input-group" style="display:flex; gap:10px;">
-                    <div style="flex:1"><span class="gm-input-label">并发数</span><input class="gm-popup-input" type="number" id="inp-max-threads" value="${App.userConfig.maxConcurrency}" min="1"></div>
-                    <div style="flex:1"><span class="gm-input-label">间隔(ms)</span><input class="gm-popup-input" type="number" id="inp-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
+                    <div style="flex:1"><label class="gm-input-label" for="inp-max-threads">并发数</label><input class="gm-popup-input" type="number" id="inp-max-threads" value="${App.userConfig.maxConcurrency}" min="1"></div>
+                    <div style="flex:1"><label class="gm-input-label" for="inp-download-delay">间隔(ms)</label><input class="gm-popup-input" type="number" id="inp-download-delay" value="${App.userConfig.downloadDelay}" min="0"></div>
                 </div>
                 <div class="gm-checkbox-row">
                     <input type="checkbox" id="gm-opt-dup" ${App.userConfig.allowDuplicate?'checked':''}>
@@ -1454,20 +1454,20 @@
                 </div>
                 
                 <div class="gm-input-group" style="margin-top:10px;">
-                    <span class="gm-input-label">批量图片/视频目录</span>
+                    <label class="gm-input-label" for="inp-batch-img-folder">批量图片/视频目录</label>
                     <input class="gm-popup-input" id="inp-batch-img-folder" value="${App.userConfig.batchImgFolder||''}">
                 </div>
                 <div class="gm-input-group">
-                    <span class="gm-input-label">批量图片文件名 (备份规则)</span>
+                    <label class="gm-input-label" for="inp-batch-img-file">批量图片文件名 (备份规则)</label>
                     <input class="gm-popup-input" id="inp-batch-img-file" value="${App.userConfig.batchImgFileName||''}">
                 </div>
  
                 <div class="gm-input-group">
-                    <span class="gm-input-label">批量文本目录</span>
+                    <label class="gm-input-label" for="inp-batch-txt-folder">批量文本目录</label>
                     <input class="gm-popup-input" id="inp-batch-txt-folder" value="${App.userConfig.batchTextFolder||''}">
                 </div>
                 <div class="gm-input-group">
-                    <span class="gm-input-label">批量文本文件名</span>
+                    <label class="gm-input-label" for="inp-batch-txt-file">批量文本文件名</label>
                     <input class="gm-popup-input" id="inp-batch-txt-file" value="${App.userConfig.batchTextFileName||''}">
                 </div>
                 
