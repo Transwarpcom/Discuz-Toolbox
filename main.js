@@ -55,6 +55,8 @@
             scrollMode: 'vertical',
             animationSpeed: 0.3,
             clickAction: 'nextPage',
+            replaceEnabled: false,
+            replaceRules: [],
             
             // 抓取配置
             tplTextFolder: '{{author}}',
@@ -272,6 +274,28 @@
                 App.downloadHistory.clear();
                 Utils.debouncedSaveHistory(); UI.showToast("🗑️ 記錄已清空");
             }
+        },
+        applyReplacements: function(text) {
+            if (!App.userConfig.replaceEnabled || !App.userConfig.replaceRules) {
+                return text;
+            }
+            var rules = App.userConfig.replaceRules;
+            for (var i = 0; i < rules.length; i++) {
+                var rule = rules[i];
+                if (rule.pattern) {
+                    try {
+                        if (rule.isRegex) {
+                            var regex = new RegExp(rule.pattern, 'g');
+                            text = text.replace(regex, rule.replacement);
+                        } else {
+                            text = text.replace(rule.pattern, rule.replacement);
+                        }
+                    } catch (e) {
+                        Logger.error('Error applying replacement rule: ', e);
+                    }
+                }
+            }
+            return text;
         }
     };
 
@@ -1157,6 +1181,7 @@
                 var contentDiv = div.querySelector('.t_f') || div.querySelector('.pcb');
                 if(contentDiv) {
                     var text = this.extractThreadContent(contentDiv);
+                    text = Utils.applyReplacements(text);
                     
                     // [新增] 提取标题摘要用于目录
                     var firstLine = text.split('\n')[0];
@@ -1558,6 +1583,24 @@
                         <button class="gm-hist-btn danger" id="gm-btn-clear-single" title="清空历史" aria-label="Clear History">🗑️</button>
                     </div>
                 </div>
+
+                <div class="gm-popup-subtitle">净化规则</div>
+                <div class="gm-checkbox-row">
+                    <input type="checkbox" id="gm-opt-replace-enabled" ${App.userConfig.replaceEnabled?'checked':''}>
+                    <label for="gm-opt-replace-enabled">启用文本替换</label>
+                </div>
+                <div id="gm-replace-rules-container"></div>
+                <div class="gm-input-group" style="display:flex; gap:5px; margin-top:10px;">
+                    <input class="gm-popup-input" id="inp-replace-pattern" placeholder="匹配模式">
+                    <input class="gm-popup-input" id="inp-replace-replacement" placeholder="替换为">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                    <div class="gm-checkbox-row">
+                        <input type="checkbox" id="inp-replace-is-regex">
+                        <label for="inp-replace-is-regex">正则</label>
+                    </div>
+                    <button class="gm-action-btn" id="btn-add-replace-rule">添加</button>
+                </div>
             `;
             document.body.appendChild(popup);
             
@@ -1580,6 +1623,59 @@
             document.getElementById('gm-btn-import-single').onclick = Utils.importHistory;
             document.getElementById('gm-btn-export-single').onclick = Utils.exportHistory;
             document.getElementById('gm-btn-clear-single').onclick = Utils.clearHistory;
+
+            // Replacement rules UI logic
+            var renderRules = function() {
+                var container = document.getElementById('gm-replace-rules-container');
+                if (!container) return;
+                container.innerHTML = '';
+                if (App.userConfig.replaceRules) {
+                    App.userConfig.replaceRules.forEach(function(rule, index) {
+                        var ruleDiv = document.createElement('div');
+                        ruleDiv.style = 'display:flex; justify-content:space-between; align-items:center; margin-top:5px;';
+                        ruleDiv.innerHTML = `<span style="font-size:12px;">${rule.pattern} -> ${rule.replacement} ${rule.isRegex ? '(R)' : ''}</span><button class="gm-hist-btn danger" data-index="${index}">-</button>`;
+                        container.appendChild(ruleDiv);
+                    });
+                }
+            };
+
+            var rulesContainer = document.getElementById('gm-replace-rules-container');
+            if (rulesContainer) {
+                rulesContainer.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'BUTTON') {
+                        var index = parseInt(e.target.getAttribute('data-index'));
+                        App.userConfig.replaceRules.splice(index, 1);
+                        Utils.debouncedSaveConfig();
+                        renderRules();
+                    }
+                });
+            }
+
+            var enabledCheck = document.getElementById('gm-opt-replace-enabled');
+            if (enabledCheck) {
+                enabledCheck.onchange = function() {
+                    App.userConfig.replaceEnabled = this.checked;
+                    Utils.debouncedSaveConfig();
+                };
+            }
+
+            var addBtn = document.getElementById('btn-add-replace-rule');
+            if (addBtn) {
+                addBtn.onclick = function() {
+                    var pattern = document.getElementById('inp-replace-pattern').value;
+                    var replacement = document.getElementById('inp-replace-replacement').value;
+                    var isRegex = document.getElementById('inp-replace-is-regex').checked;
+                    if (pattern) {
+                        App.userConfig.replaceRules.push({ pattern: pattern, replacement: replacement, isRegex: isRegex });
+                        Utils.debouncedSaveConfig();
+                        renderRules();
+                        document.getElementById('inp-replace-pattern').value = '';
+                        document.getElementById('inp-replace-replacement').value = '';
+                    }
+                };
+            }
+
+            renderRules();
         },
  
         renderBatchConfigPopup: function() {
