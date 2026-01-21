@@ -963,7 +963,7 @@
                             walk(child);
                             child = child.nextSibling;
                         }
-                        if (regexBlockTags.test(tag)) chunks.push('\n');
+                        if (REGEX_BLOCK_TAGS.test(tag)) chunks.push('\n');
                     }
                 } else if (node.nodeType === 3) { // Text
                     chunks.push(node.nodeValue);
@@ -1151,6 +1151,7 @@
             }
             else { var mFloor = div.querySelector('.authi li.grey em');
                 if (mFloor) floor = mFloor.innerText.replace(REGEX_CONTROL_CHARS, '').replace('^#', '').trim(); }
+            div._gm_floor = floor;
             return floor;
         },
         getDate: function(div) {
