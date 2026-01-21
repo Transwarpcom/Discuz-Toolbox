@@ -36,6 +36,7 @@
         key: 'gm_discuz_assistant_config',
         posKey: 'gm_discuz_assistant_pos',
         historyKey: 'gm_discuz_download_history',
+        scrollPosKey: 'gm_discuz_assistant_scroll_pos',
         isRunning: false,
         isDownloading: false,
         isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
@@ -365,6 +366,19 @@
             this.authorOnlyStyleEl = document.createElement('style');
             this.authorOnlyStyleEl.id = 'gm-author-only-style';
             (document.head || document.documentElement).appendChild(this.authorOnlyStyleEl);
+
+            // Restore scroll position
+            try {
+                var savedPos = localStorage.getItem(App.scrollPosKey);
+                if (savedPos) {
+                    var data = JSON.parse(savedPos);
+                    if (data.tid === App.meta.tid && data.position > 0) {
+                        setTimeout(function() {
+                            document.getElementById('gm-reader-scroll-box').scrollTop = data.position;
+                        }, 100);
+                    }
+                }
+            } catch(e) {}
         },
         buildHTML: function() {
             var title = App.meta.title || '阅读模式';
@@ -487,6 +501,11 @@
             var scrollBox = document.getElementById('gm-reader-scroll-box');
             var progressBar = document.getElementById('gm-reader-progress-bar');
             if (scrollBox && progressBar) {
+                var debouncedSave = Utils.debounce(function(scrollTop) {
+                    var scrollData = { tid: App.meta.tid, position: scrollTop };
+                    localStorage.setItem(App.scrollPosKey, JSON.stringify(scrollData));
+                }, 300);
+
                 var ticking = false;
                 scrollBox.onscroll = function() {
                     if (!ticking) {
@@ -496,6 +515,10 @@
                             var clientHeight = scrollBox.clientHeight;
                             var scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
                             progressBar.style.width = scrollPercent + '%';
+
+                            // Save scroll position
+                            debouncedSave(scrollTop);
+
                             ticking = false;
                         });
                         ticking = true;
