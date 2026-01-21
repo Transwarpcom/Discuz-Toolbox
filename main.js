@@ -1628,7 +1628,6 @@
                         rafId = requestAnimationFrame(function() {
                             var dx = currentX - startX;
                             var dy = currentY - startY;
-                            // Optimize: Use transform for smooth 60fps drag without layout thrashing
                             el.style.transform = 'translate3d(' + dx + 'px, ' + dy + 'px, 0)';
                             ticking = false;
                         });
