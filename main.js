@@ -399,7 +399,7 @@
                 '</div>',
                 '<div id="gm-reader-toc"><div class="gm-toc-header" style="padding:15px;font-weight:bold;border-bottom:1px solid #eee;">目录</div><div id="gm-toc-list" style="flex:1;overflow-y:auto;"></div></div>',
                 '<div id="gm-reader-settings">',
-                '   <div class="gm-set-row"><span class="gm-set-label">配色</span><div class="gm-set-ctrl"><button class="gm-theme-btn" id="btn-warm">📖 羊皮</button><button class="gm-theme-btn" id="btn-night">🌙 极夜</button></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">配色</span><div class="gm-set-ctrl"><button class="gm-theme-btn" id="btn-warm">📖 羊皮</button><button class="gm-theme-btn" id="btn-sepia">📜 泛黄</button><button class="gm-theme-btn" id="btn-gray">👓 灰度</button><button class="gm-theme-btn" id="btn-night">🌙 极夜</button></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字体</span><div class="gm-set-ctrl"><select id="inp-font">' + fontOpts + '</select></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字号</span><div class="gm-set-ctrl"><input type="range" id="inp-size" min="14" max="32" step="1"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字重</span><div class="gm-set-ctrl"><input type="range" id="inp-weight" min="100" max="900" step="100"></div></div>',
@@ -496,6 +496,8 @@
             bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight');
             document.getElementById('btn-night').onclick = function() { App.userConfig.bgColor='#1a1a1a'; App.userConfig.paperColor='#2c2c2c'; App.userConfig.textColor='#a0a0a0'; Reader.save(); };
             document.getElementById('btn-warm').onclick = function() { App.userConfig.bgColor='#f7f1e3'; App.userConfig.paperColor='#fffef8'; App.userConfig.textColor='#2d3436'; Reader.save(); };
+            document.getElementById('btn-sepia').onclick = function() { App.userConfig.bgColor='#fbf0d9'; App.userConfig.paperColor='#f4e8c8'; App.userConfig.textColor='#5b4636'; Reader.save(); };
+            document.getElementById('btn-gray').onclick = function() { App.userConfig.bgColor='#e0e0e0'; App.userConfig.paperColor='#f5f5f5'; App.userConfig.textColor='#333333'; Reader.save(); };
 
             // Progress bar logic
             var scrollBox = document.getElementById('gm-reader-scroll-box');
