@@ -192,7 +192,6 @@
         },
         renderTemplate: function(tpl, data) {
             if (!tpl) return "";
-            // Optimize: use single regex replace instead of loop + new RegExp
             return Utils.sanitizeFilename(tpl.replace(REGEX_TEMPLATE, function(match, key) {
                 return (data && key in data) ? String(data[key] || '') : match;
             }));
