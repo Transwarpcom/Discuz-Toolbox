@@ -401,7 +401,7 @@
                 '<div id="gm-reader-toc"><div class="gm-toc-header" style="padding:15px;font-weight:bold;border-bottom:1px solid #eee;">目录</div><div id="gm-toc-list" style="flex:1;overflow-y:auto;"></div></div>',
                 '<div id="gm-reader-settings">',
                 '   <div class="gm-set-row"><span class="gm-set-label">配色</span><div class="gm-set-ctrl"><button class="gm-theme-btn" id="btn-warm">📖 羊皮</button><button class="gm-theme-btn" id="btn-sepia">📜 泛黄</button><button class="gm-theme-btn" id="btn-gray">👓 灰度</button><button class="gm-theme-btn" id="btn-night">🌙 极夜</button></div></div>',
-                '   <div class="gm-set-row"><span class="gm-set-label">字体</span><div class="gm-set-ctrl"><select id="inp-font">' + fontOpts + '</select></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">字体</span><div class="gm-set-ctrl" style="display: flex; align-items: center; gap: 8px;"><select id="inp-font" style="flex: 1;">' + fontOpts + '</select><input type="color" id="inp-color" style="width: 40px; height: 30px; padding: 2px; border: none; background: transparent;"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字号</span><div class="gm-set-ctrl"><input type="range" id="inp-size" min="14" max="32" step="1"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字重</span><div class="gm-set-ctrl"><input type="range" id="inp-weight" min="100" max="900" step="100"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">行距</span><div class="gm-set-ctrl"><input type="range" id="inp-line" min="1.4" max="2.4" step="0.1"></div></div>',
@@ -459,7 +459,7 @@
             ov.style.setProperty('--content-width', c.widthMode);
             ov.style.setProperty('--letter-spacing', c.letterSpacing + 'em');
             var setVal = function(id, v) { var e=document.getElementById(id); if(e) e.value=v; };
-            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing);
+            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor);
         },
         save: function() { Utils.debouncedSaveConfig(); this.applyConfig(); },
         close: function() {
@@ -496,7 +496,7 @@
                     el.oninput = function(e){ App.userConfig[k]=e.target.value; Reader.applyConfig(); };
                 }
             };
-            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing');
+            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor');
             document.getElementById('btn-night').onclick = function() { App.userConfig.bgColor='#1a1a1a'; App.userConfig.paperColor='#2c2c2c'; App.userConfig.textColor='#a0a0a0'; Reader.save(); };
             document.getElementById('btn-warm').onclick = function() { App.userConfig.bgColor='#f7f1e3'; App.userConfig.paperColor='#fffef8'; App.userConfig.textColor='#2d3436'; Reader.save(); };
             document.getElementById('btn-sepia').onclick = function() { App.userConfig.bgColor='#fbf0d9'; App.userConfig.paperColor='#f4e8c8'; App.userConfig.textColor='#5b4636'; Reader.save(); };
