@@ -1018,10 +1018,7 @@
         parseImages: function(doc, postNodes) {
             var images = [];
             // Optimize: Use passed nodes or fetch them
-            var postDivs = postNodes;
-            if (!postDivs) {
-                postDivs = Scraper.getPostNodes(doc);
-            }
+            var postDivs = postNodes || Scraper.getPostNodes(doc);
             
             // Helper to check ancestry safely (ES5 compatible)
             var hasClassInAncestry = function(el, className, limitEl) {
