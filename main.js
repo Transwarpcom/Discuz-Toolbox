@@ -331,7 +331,9 @@
                 '.gm-theme-btn.active { background: #e7f5ff; border-color: #228be6; color: #1971c2; }',
                 '.gm-post-item { margin-bottom: 60px; }',
                 '.gm-post-meta { font-size: 12px; color: #adb5bd; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; font-family: system-ui, sans-serif; }',
-                '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: 0.03em; }'
+                '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: 0.03em; }',
+                '#gm-reader-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 2147483650; pointer-events: none; }',
+                '#gm-reader-progress-bar { width: 0%; height: 100%; background-color: #3498db; transition: width 0.1s ease-out; }'
             ];
             Utils.safeAddStyle(css.join('\n'));
         }
@@ -369,6 +371,7 @@
             var fonts = [ { name: "微软雅黑", val: "'Microsoft YaHei', 'PingFang SC', sans-serif" }, { name: "宋体", val: "'SimSun', serif" }, { name: "楷体", val: "'KaiTi', serif" }, { name: "系统默认", val: "sans-serif" } ];
             var fontOpts = fonts.map(function(f) { return '<option value="' + f.val + '">' + f.name + '</option>'; }).join('');
             return [
+                '<div id="gm-reader-progress-container"><div id="gm-reader-progress-bar"></div></div>',
                 '<div id="gm-reader-scroll-box"><div class="gm-content-wrapper" id="gm-content-area"></div></div>',
                 '<div id="gm-fab-menu">☰</div>',
                 '<div id="gm-reader-toolbar">',
@@ -479,6 +482,26 @@
             bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight');
             document.getElementById('btn-night').onclick = function() { App.userConfig.bgColor='#1a1a1a'; App.userConfig.paperColor='#2c2c2c'; App.userConfig.textColor='#a0a0a0'; Reader.save(); };
             document.getElementById('btn-warm').onclick = function() { App.userConfig.bgColor='#f7f1e3'; App.userConfig.paperColor='#fffef8'; App.userConfig.textColor='#2d3436'; Reader.save(); };
+
+            // Progress bar logic
+            var scrollBox = document.getElementById('gm-reader-scroll-box');
+            var progressBar = document.getElementById('gm-reader-progress-bar');
+            if (scrollBox && progressBar) {
+                var ticking = false;
+                scrollBox.onscroll = function() {
+                    if (!ticking) {
+                        window.requestAnimationFrame(function() {
+                            var scrollTop = scrollBox.scrollTop;
+                            var scrollHeight = scrollBox.scrollHeight;
+                            var clientHeight = scrollBox.clientHeight;
+                            var scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
+                            progressBar.style.width = scrollPercent + '%';
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                };
+            }
         },
         toggleAuthorOnly: function() {
             this.isAuthorOnly = !this.isAuthorOnly;
