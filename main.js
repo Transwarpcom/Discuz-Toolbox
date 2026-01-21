@@ -50,6 +50,7 @@
             fontSize: 18, fontWeight: 400, lineHeight: 1.8,
             fontFamily: "'Microsoft YaHei', 'PingFang SC', sans-serif",
             widthMode: '860px', minLength: 0,
+            letterSpacing: 0,
             
             // 抓取配置
             tplTextFolder: '{{author}}',
@@ -332,7 +333,7 @@
                 '.gm-theme-btn.active { background: #e7f5ff; border-color: #228be6; color: #1971c2; }',
                 '.gm-post-item { margin-bottom: 60px; }',
                 '.gm-post-meta { font-size: 12px; color: #adb5bd; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; font-family: system-ui, sans-serif; }',
-                '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: 0.03em; }',
+                '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: var(--letter-spacing, 0.03em) !important; }',
                 '#gm-reader-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 2147483650; pointer-events: none; }',
                 '#gm-reader-progress-bar { width: 0%; height: 100%; background-color: #3498db; transition: width 0.1s ease-out; }'
             ];
@@ -404,6 +405,7 @@
                 '   <div class="gm-set-row"><span class="gm-set-label">字号</span><div class="gm-set-ctrl"><input type="range" id="inp-size" min="14" max="32" step="1"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字重</span><div class="gm-set-ctrl"><input type="range" id="inp-weight" min="100" max="900" step="100"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">行距</span><div class="gm-set-ctrl"><input type="range" id="inp-line" min="1.4" max="2.4" step="0.1"></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">字距</span><div class="gm-set-ctrl"><input type="range" id="inp-spacing" min="0" max="1" step="0.05"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><select id="inp-width"><option value="600px">窄版</option><option value="860px">舒适</option><option value="1000px">宽屏</option><option value="90%">全幅</option></select></div></div>',
                 '</div>'
             ].join('');
@@ -455,8 +457,9 @@
             ov.style.setProperty('--line-height', c.lineHeight);
             ov.style.setProperty('--font-family', c.fontFamily);
             ov.style.setProperty('--content-width', c.widthMode);
+            ov.style.setProperty('--letter-spacing', c.letterSpacing + 'em');
             var setVal = function(id, v) { var e=document.getElementById(id); if(e) e.value=v; };
-            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight);
+            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing);
         },
         save: function() { Utils.debouncedSaveConfig(); this.applyConfig(); },
         close: function() {
@@ -493,7 +496,7 @@
                     el.oninput = function(e){ App.userConfig[k]=e.target.value; Reader.applyConfig(); };
                 }
             };
-            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight');
+            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing');
             document.getElementById('btn-night').onclick = function() { App.userConfig.bgColor='#1a1a1a'; App.userConfig.paperColor='#2c2c2c'; App.userConfig.textColor='#a0a0a0'; Reader.save(); };
             document.getElementById('btn-warm').onclick = function() { App.userConfig.bgColor='#f7f1e3'; App.userConfig.paperColor='#fffef8'; App.userConfig.textColor='#2d3436'; Reader.save(); };
             document.getElementById('btn-sepia').onclick = function() { App.userConfig.bgColor='#fbf0d9'; App.userConfig.paperColor='#f4e8c8'; App.userConfig.textColor='#5b4636'; Reader.save(); };
