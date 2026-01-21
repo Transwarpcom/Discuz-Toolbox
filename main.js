@@ -52,6 +52,8 @@
             widthMode: '860px', minLength: 0,
             letterSpacing: 0,
             paragraphSpacing: 60,
+            scrollMode: 'vertical',
+            animationSpeed: 0.3,
             
             // 抓取配置
             tplTextFolder: '{{author}}',
@@ -314,13 +316,13 @@
                 // Reader CSS
                 '#gm-reader-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-color); color: var(--text-color); z-index: 2147483640; font-family: var(--font-family); overflow: hidden; outline: none; line-height: 1.5; }',
                 '#gm-reader-scroll-box { position: relative; z-index: 2147483641; width: 100%; height: 100%; box-sizing: border-box; display: block; overflow-y: auto; padding: 40px 0 120px 0; scroll-behavior: smooth; }',
-                '.gm-content-wrapper { width: var(--content-width); max-width: 95vw; margin: 0 auto; padding: 60px 80px; box-sizing: border-box; background-color: var(--paper-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-radius: 8px; min-height: calc(100vh - 100px); }',
-                '@media (max-width: 768px) { .gm-content-wrapper { padding: 30px 20px; width: 100% !important; border-radius: 0; box-shadow: none; } }',
-                '#gm-fab-menu { position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px; border-radius: 25px; background: rgba(33, 37, 41, 0.9); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; z-index: 2147483648; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.3); transition: all 0.3s; backdrop-filter: blur(4px); }',
-                '#gm-reader-toolbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(255,255,255,0.95); color: #333; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-sizing: border-box; transform: translateY(-100%); transition: transform 0.3s ease; z-index: 2147483649; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }',
+                '.gm-content-wrapper { max-width: var(--content-width); margin: 0 auto; padding: 60px 80px; box-sizing: border-box; background-color: var(--paper-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-radius: 8px; min-height: calc(100vh - 100px); }',
+                '@media (max-width: 768px) { .gm-content-wrapper { padding: 30px 20px; max-width: 100%; border-radius: 0; box-shadow: none; } }',
+                '#gm-fab-menu { position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px; border-radius: 25px; background: rgba(33, 37, 41, 0.9); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; z-index: 2147483648; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.3); transition: all var(--animation-duration, 0.3s); backdrop-filter: blur(4px); }',
+                '#gm-reader-toolbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(255,255,255,0.95); color: #333; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-sizing: border-box; transform: translateY(-100%); transition: transform var(--animation-duration, 0.3s) ease; z-index: 2147483649; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }',
                 '#gm-reader-toolbar.visible { transform: translateY(0); }',
                 '.gm-tool-btn { background: transparent; border: 1px solid #e9ecef; color: #495057; padding: 6px 14px; border-radius: 8px; margin-left: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }',
-                '#gm-reader-toc, #gm-reader-settings { position: fixed; background: rgba(255,255,255,0.95); color: #333; z-index: 2147483649; transition: transform 0.3s; backdrop-filter: blur(12px); }',
+                '#gm-reader-toc, #gm-reader-settings { position: fixed; background: rgba(255,255,255,0.95); color: #333; z-index: 2147483649; transition: transform var(--animation-duration, 0.3s); backdrop-filter: blur(12px); }',
                 '#gm-reader-toc { top: 0; left: 0; bottom: 0; width: 300px; transform: translateX(-100%); display: flex; flex-direction: column; border-right: 1px solid rgba(0,0,0,0.05); }',
                 '#gm-reader-toc.visible { transform: translateX(0); }',
                 '.gm-toc-item { padding: 12px 20px; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.02); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #495057; }',
@@ -336,6 +338,8 @@
                 '.gm-post-item { margin-bottom: var(--paragraph-spacing, 60px); }',
                 '.gm-post-meta { font-size: 12px; color: #adb5bd; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; font-family: system-ui, sans-serif; }',
                 '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: var(--letter-spacing, 0.03em) !important; }',
+                '.horizontal-scroll { overflow-x: auto; overflow-y: hidden; white-space: nowrap; scroll-snap-type: x mandatory; }',
+                '.horizontal-scroll .gm-content-wrapper { display: inline-block; width: 80vw; white-space: normal; vertical-align: top; scroll-snap-align: start; }',
                 '#gm-reader-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 2147483650; pointer-events: none; }',
                 '#gm-reader-progress-bar { width: 0%; height: 100%; background-color: #3498db; transition: width 0.1s ease-out; }'
             ];
@@ -410,6 +414,8 @@
                 '   <div class="gm-set-row"><span class="gm-set-label">字距</span><div class="gm-set-ctrl"><input type="range" id="inp-spacing" min="0" max="1" step="0.05"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">段距</span><div class="gm-set-ctrl"><input type="range" id="inp-paragraph" min="20" max="120" step="10"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><button class="gm-stepper-btn" id="btn-width-minus">-</button><input type="text" id="inp-width" style="flex: 1; text-align: center;"><button class="gm-stepper-btn" id="btn-width-plus">+</button></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">滚动</span><div class="gm-set-ctrl"><select id="inp-scroll"><option value="vertical">上下</option><option value="horizontal">左右</option></select></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">动画</span><div class="gm-set-ctrl"><input type="range" id="inp-animation" min="0" max="1" step="0.1"></div></div>',
                 '</div>'
             ].join('');
         },
@@ -462,8 +468,18 @@
             ov.style.setProperty('--content-width', c.widthMode);
             ov.style.setProperty('--letter-spacing', c.letterSpacing + 'em');
             ov.style.setProperty('--paragraph-spacing', c.paragraphSpacing + 'px');
+            ov.style.setProperty('--animation-duration', c.animationSpeed + 's');
             var setVal = function(id, v) { var e=document.getElementById(id); if(e) e.value=v; };
-            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor); setVal('inp-font-text', c.fontFamily); setVal('inp-paragraph', c.paragraphSpacing);
+            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor); setVal('inp-font-text', c.fontFamily); setVal('inp-paragraph', c.paragraphSpacing); setVal('inp-scroll', c.scrollMode); setVal('inp-animation', c.animationSpeed);
+
+            var scrollBox = document.getElementById('gm-reader-scroll-box');
+            if (scrollBox) {
+                if (c.scrollMode === 'horizontal') {
+                    scrollBox.classList.add('horizontal-scroll');
+                } else {
+                    scrollBox.classList.remove('horizontal-scroll');
+                }
+            }
         },
         save: function() { Utils.debouncedSaveConfig(); this.applyConfig(); },
         close: function() {
@@ -500,7 +516,7 @@
                     el.oninput = function(e){ App.userConfig[k]=e.target.value; Reader.applyConfig(); };
                 }
             };
-            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing');
+            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing'); bind('inp-scroll', 'scrollMode'); bind('inp-animation', 'animationSpeed');
 
             var fontSelect = document.getElementById('inp-font');
             var fontTextInput = document.getElementById('inp-font-text');
