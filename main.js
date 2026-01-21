@@ -1382,9 +1382,9 @@
                 <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #eee; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:12px;color:#666;">历史记录</span>
                     <div>
-                        <button class="gm-hist-btn" id="gm-btn-import-single" title="导入 .json 历史记录">📥</button>
-                        <button class="gm-hist-btn" id="gm-btn-export-single" title="导出历史记录">📤</button>
-                        <button class="gm-hist-btn danger" id="gm-btn-clear-single" title="清空历史">🗑️</button>
+                        <button class="gm-hist-btn" id="gm-btn-import-single" title="导入 .json 历史记录" aria-label="Import History">📥</button>
+                        <button class="gm-hist-btn" id="gm-btn-export-single" title="导出历史记录" aria-label="Export History">📤</button>
+                        <button class="gm-hist-btn danger" id="gm-btn-clear-single" title="清空历史" aria-label="Clear History">🗑️</button>
                     </div>
                 </div>
             `;
