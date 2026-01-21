@@ -52,6 +52,7 @@
             widthMode: '860px', minLength: 0,
             letterSpacing: 0,
             paragraphSpacing: 60,
+            scrollMode: 'vertical',
             
             // 抓取配置
             tplTextFolder: '{{author}}',
@@ -336,6 +337,8 @@
                 '.gm-post-item { margin-bottom: var(--paragraph-spacing, 60px); }',
                 '.gm-post-meta { font-size: 12px; color: #adb5bd; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; font-family: system-ui, sans-serif; }',
                 '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: var(--letter-spacing, 0.03em) !important; }',
+                '.horizontal-scroll { overflow-x: auto; overflow-y: hidden; white-space: nowrap; scroll-snap-type: x mandatory; }',
+                '.horizontal-scroll .gm-content-wrapper { display: inline-block; width: 80vw; white-space: normal; vertical-align: top; scroll-snap-align: start; }',
                 '#gm-reader-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 2147483650; pointer-events: none; }',
                 '#gm-reader-progress-bar { width: 0%; height: 100%; background-color: #3498db; transition: width 0.1s ease-out; }'
             ];
@@ -410,6 +413,7 @@
                 '   <div class="gm-set-row"><span class="gm-set-label">字距</span><div class="gm-set-ctrl"><input type="range" id="inp-spacing" min="0" max="1" step="0.05"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">段距</span><div class="gm-set-ctrl"><input type="range" id="inp-paragraph" min="20" max="120" step="10"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><button class="gm-stepper-btn" id="btn-width-minus">-</button><input type="text" id="inp-width" style="flex: 1; text-align: center;"><button class="gm-stepper-btn" id="btn-width-plus">+</button></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">滚动</span><div class="gm-set-ctrl"><select id="inp-scroll"><option value="vertical">上下</option><option value="horizontal">左右</option></select></div></div>',
                 '</div>'
             ].join('');
         },
@@ -463,7 +467,16 @@
             ov.style.setProperty('--letter-spacing', c.letterSpacing + 'em');
             ov.style.setProperty('--paragraph-spacing', c.paragraphSpacing + 'px');
             var setVal = function(id, v) { var e=document.getElementById(id); if(e) e.value=v; };
-            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor); setVal('inp-font-text', c.fontFamily); setVal('inp-paragraph', c.paragraphSpacing);
+            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor); setVal('inp-font-text', c.fontFamily); setVal('inp-paragraph', c.paragraphSpacing); setVal('inp-scroll', c.scrollMode);
+
+            var scrollBox = document.getElementById('gm-reader-scroll-box');
+            if (scrollBox) {
+                if (c.scrollMode === 'horizontal') {
+                    scrollBox.classList.add('horizontal-scroll');
+                } else {
+                    scrollBox.classList.remove('horizontal-scroll');
+                }
+            }
         },
         save: function() { Utils.debouncedSaveConfig(); this.applyConfig(); },
         close: function() {
@@ -500,7 +513,7 @@
                     el.oninput = function(e){ App.userConfig[k]=e.target.value; Reader.applyConfig(); };
                 }
             };
-            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing');
+            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing'); bind('inp-scroll', 'scrollMode');
 
             var fontSelect = document.getElementById('inp-font');
             var fontTextInput = document.getElementById('inp-font-text');
