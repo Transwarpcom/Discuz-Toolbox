@@ -174,7 +174,6 @@
             });
         },
         sanitizeFilename: function(name) {
-            // Optimize: early return for empty string and ensure string type
             if (!name) return '';
             return String(name).replace(REGEX_INVALID_CHARS, '_')
                        .replace(REGEX_CONTROL_CHARS, '')
