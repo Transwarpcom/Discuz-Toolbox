@@ -51,6 +51,7 @@
             fontFamily: "'Microsoft YaHei', 'PingFang SC', sans-serif",
             widthMode: '860px', minLength: 0,
             letterSpacing: 0,
+            paragraphSpacing: 60,
             
             // 抓取配置
             tplTextFolder: '{{author}}',
@@ -332,7 +333,7 @@
                 '.gm-set-ctrl .gm-stepper-btn { padding: 5px 10px; border: 1px solid #ced4da; background: #fff; cursor: pointer; }',
                 '.gm-theme-btn { flex: 1; padding: 10px; border: 1px solid #dee2e6; background: #fff; border-radius: 8px; cursor: pointer; color: #495057; font-size: 13px; font-weight: 500; }',
                 '.gm-theme-btn.active { background: #e7f5ff; border-color: #228be6; color: #1971c2; }',
-                '.gm-post-item { margin-bottom: 60px; }',
+                '.gm-post-item { margin-bottom: var(--paragraph-spacing, 60px); }',
                 '.gm-post-meta { font-size: 12px; color: #adb5bd; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; font-family: system-ui, sans-serif; }',
                 '.gm-post-text { font-size: var(--font-size) !important; font-weight: var(--font-weight) !important; line-height: var(--line-height) !important; font-family: var(--font-family) !important; text-align: justify; white-space: pre-wrap; word-break: break-all; letter-spacing: var(--letter-spacing, 0.03em) !important; }',
                 '#gm-reader-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 2147483650; pointer-events: none; }',
@@ -407,6 +408,7 @@
                 '   <div class="gm-set-row"><span class="gm-set-label">字重</span><div class="gm-set-ctrl"><input type="range" id="inp-weight" min="100" max="900" step="100"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">行距</span><div class="gm-set-ctrl"><input type="range" id="inp-line" min="1.4" max="2.4" step="0.1"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">字距</span><div class="gm-set-ctrl"><input type="range" id="inp-spacing" min="0" max="1" step="0.05"></div></div>',
+                '   <div class="gm-set-row"><span class="gm-set-label">段距</span><div class="gm-set-ctrl"><input type="range" id="inp-paragraph" min="20" max="120" step="10"></div></div>',
                 '   <div class="gm-set-row"><span class="gm-set-label">宽度</span><div class="gm-set-ctrl"><button class="gm-stepper-btn" id="btn-width-minus">-</button><input type="text" id="inp-width" style="flex: 1; text-align: center;"><button class="gm-stepper-btn" id="btn-width-plus">+</button></div></div>',
                 '</div>'
             ].join('');
@@ -459,8 +461,9 @@
             ov.style.setProperty('--font-family', c.fontFamily);
             ov.style.setProperty('--content-width', c.widthMode);
             ov.style.setProperty('--letter-spacing', c.letterSpacing + 'em');
+            ov.style.setProperty('--paragraph-spacing', c.paragraphSpacing + 'px');
             var setVal = function(id, v) { var e=document.getElementById(id); if(e) e.value=v; };
-            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor); setVal('inp-font-text', c.fontFamily);
+            setVal('inp-size', c.fontSize); setVal('inp-line', c.lineHeight); setVal('inp-width', c.widthMode); setVal('inp-font', c.fontFamily); setVal('inp-weight', c.fontWeight); setVal('inp-spacing', c.letterSpacing); setVal('inp-color', c.textColor); setVal('inp-font-text', c.fontFamily); setVal('inp-paragraph', c.paragraphSpacing);
         },
         save: function() { Utils.debouncedSaveConfig(); this.applyConfig(); },
         close: function() {
@@ -497,7 +500,7 @@
                     el.oninput = function(e){ App.userConfig[k]=e.target.value; Reader.applyConfig(); };
                 }
             };
-            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily');
+            bind('inp-size', 'fontSize'); bind('inp-line', 'lineHeight'); bind('inp-width', 'widthMode'); bind('inp-font', 'fontFamily'); bind('inp-weight', 'fontWeight'); bind('inp-spacing', 'letterSpacing'); bind('inp-color', 'textColor'); bind('inp-font-text', 'fontFamily'); bind('inp-paragraph', 'paragraphSpacing');
 
             var fontSelect = document.getElementById('inp-font');
             var fontTextInput = document.getElementById('inp-font-text');
