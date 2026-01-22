@@ -2,7 +2,7 @@
 // @name         Discuz! 论坛助手 (Discuz! Forum Assistant)
 // @name:en      Discuz! Forum Assistant
 // @namespace    http://tampermonkey.net/
-// @version      13.35.9
+// @version      13.36.0
 // @description  Discuz! 论坛全能助手：智能抓取模式（Alt+键只抓作者前3页）、全量抓取模式（Ctrl+Alt+键抓所有）；一键提取图片（自动修复文件名/格式/并发下载）；沉浸式阅读；自定义下载路径。
 // @description:en Discuz! Forum Assistant: Smart scraping (Alt+keys for author's first 3 pages), full scraping (Ctrl+Alt+keys); One-click image download (auto-fix filenames/extensions/concurrent); Immersive reading; Custom download path.
 // @license      GPL-3.0
@@ -1097,30 +1097,22 @@
                     if (hasClassInAncestry(img, 'ignore_js_op', div)) continue;
  
                     var src = img.getAttribute('zoomfile') || img.getAttribute('file') || img.src;
-                    if (!src) return;
+                    if (!src) continue;
                     if (src.indexOf('mod=attachment') !== -1) {
                          src = src.replace('&noupdate=yes', '').replace(REGEX_AMP, '&');
                     }
                     if (src.indexOf('http://') === 0) src = src.replace('http://', 'https://');
                     
-                    if (inContainer) {
-                         var src = img.getAttribute('zoomfile') || img.getAttribute('file') || img.src;
-                         if (!src) continue;
-                         if (src.indexOf('mod=attachment') !== -1) {
-                              src = src.replace('&noupdate=yes', '').replace(regexAmp, '&');
-                         }
-                         if (src.indexOf('http://') === 0) src = src.replace('http://', 'https://');
-                         if (src.indexOf('http') !== 0) { try { src = new URL(src, window.location.href).href; } catch(e) { src = window.location.origin + '/' + src; } }
+                    if (src.indexOf('http') !== 0) { try { src = new URL(src, window.location.href).href; } catch(e) { src = window.location.origin + '/' + src; } }
 
-                         var lowSrc = src.toLowerCase();
-                         if (Scraper.isGarbageImage(lowSrc)) continue;
+                    var lowSrc = src.toLowerCase();
+                    if (Scraper.isGarbageImage(lowSrc)) continue;
 
-                         if (img.className && img.className.indexOf('vm') !== -1) continue;
-                         var originalName = '';
-                         if (!originalName || originalName.length < 3) originalName = img.getAttribute('title') || '';
-                         if (!originalName || originalName.length < 3) originalName = img.getAttribute('alt') || '';
-                         images.push({ url: src, floor: floor, date: date, fileName: originalName });
-                    }
+                    if (img.className && img.className.indexOf('vm') !== -1) continue;
+                    var originalName = '';
+                    if (!originalName || originalName.length < 3) originalName = img.getAttribute('title') || '';
+                    if (!originalName || originalName.length < 3) originalName = img.getAttribute('alt') || '';
+                    images.push({ url: src, floor: floor, date: date, fileName: originalName });
                 }
             });
             return images;
