@@ -963,7 +963,7 @@
                             walk(child);
                             child = child.nextSibling;
                         }
-                        if (regexBlockTags.test(tag)) chunks.push('\n');
+                        if (REGEX_BLOCK_TAGS.test(tag)) chunks.push('\n');
                     }
                 } else if (node.nodeType === 3) { // Text
                     chunks.push(node.nodeValue);
@@ -1044,6 +1044,7 @@
                          if (['.jpg','.png','.gif','.jpeg','.webp','.bmp'].some(function(e){ return fn.toLowerCase().endsWith(e); })) {
                              var src = link.href;
                              if (src.indexOf('mod=attachment') !== -1) src = src.replace(REGEX_AMP, '&');
+                             if (src.indexOf('http://') === 0) src = src.replace('http://', 'https://');
                              if (src.indexOf('http') !== 0) { try { src = new URL(src, window.location.href).href;
                              } catch(e) { src = window.location.origin + '/' + src;
                              } }
@@ -1066,6 +1067,7 @@
                              if (!src) return;
                              
                              if (src.indexOf('mod=attachment') !== -1) src = src.replace(REGEX_AMP, '&');
+                             if (src.indexOf('http://') === 0) src = src.replace('http://', 'https://');
                              if (src.indexOf('http') !== 0) { try { src = new URL(src, window.location.href).href; } catch(e) { src = window.location.origin + '/' + src; } }
 
                              // 获取文件名
@@ -1099,6 +1101,7 @@
                     if (src.indexOf('mod=attachment') !== -1) {
                          src = src.replace('&noupdate=yes', '').replace(REGEX_AMP, '&');
                     }
+                    if (src.indexOf('http://') === 0) src = src.replace('http://', 'https://');
                     
                     if (src.indexOf('http') !== 0) { try { src = new URL(src, window.location.href).href; } catch(e) { src = window.location.origin + '/' + src; } }
 
@@ -1127,6 +1130,7 @@
                     var source = v.querySelector('source');
                     var src = v.src || (source ? source.src : null);
                     if (src) {
+                        if (src.indexOf('http://') === 0) src = src.replace('http://', 'https://');
                         if (src.indexOf('http') !== 0) src = window.location.origin + '/' + src;
                         videos.push({ url: src, floor: floor, date: date, ext: '.mp4' });
                     }
@@ -1134,6 +1138,7 @@
                 var aTags = div.querySelectorAll('a[href*=".mp4"], a[href*=".mov"], a[href*=".avi"]');
                 aTags.forEach(function(a) {
                     var src = a.href;
+                    if (src.indexOf('http://') === 0) src = src.replace('http://', 'https://');
                     var ext = src.substring(src.lastIndexOf('.'));
                     if (ext.length > 5) ext = '.mp4';
                     videos.push({ url: src, floor: floor, date: date, ext: ext });
