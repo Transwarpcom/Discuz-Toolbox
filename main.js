@@ -758,12 +758,20 @@
             // 强力去重逻辑：优先使用 文件名，其次使用 URL
             var uniqueItems = [];
             var seenKeys = new Set();
-            mediaList.forEach(function(item) { 
-                var key = item.fileName ? (item.fileName + '_' + item.floor) : item.url;
-                if (!seenKeys.has(key)) { 
-                    seenKeys.add(key); 
-                    uniqueItems.push(item); 
-                } 
+            mediaList.forEach(function(item) {
+                // 文本类型总是保留（因为是 Blob URL，且每个帖子只有一个文本汇总）
+                if (item.type === 'text') {
+                    uniqueItems.push(item);
+                    return;
+                }
+
+                // 图片/视频去重：基于 URL + 楼层
+                // 之前的逻辑如果 fileName 为空会导致和有 fileName 的同一资源被视为不同
+                var uniqueId = item.url + '_' + item.floor;
+                if (!seenKeys.has(uniqueId)) {
+                    seenKeys.add(uniqueId);
+                    uniqueItems.push(item);
+                }
             });
             var active = 0; 
             var max = parseInt(App.userConfig.maxConcurrency) || 5; 
