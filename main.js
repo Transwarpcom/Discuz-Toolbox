@@ -2,7 +2,7 @@
 // @name         Discuz! 论坛助手 (Discuz! Forum Assistant)
 // @name:en      Discuz! Forum Assistant
 // @namespace    http://tampermonkey.net/
-// @version      13.36.0
+// @version      13.36.1
 // @description  Discuz! 论坛全能助手：智能抓取模式（Alt+键只抓作者前3页）、全量抓取模式（Ctrl+Alt+键抓所有）；一键提取图片（自动修复文件名/格式/并发下载）；沉浸式阅读；自定义下载路径。
 // @description:en Discuz! Forum Assistant: Smart scraping (Alt+keys for author's first 3 pages), full scraping (Ctrl+Alt+keys); One-click image download (auto-fix filenames/extensions/concurrent); Immersive reading; Custom download path.
 // @license      GPL-3.0
